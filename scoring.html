@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>呼吸道整合能力評分單（教師用）</title>
+<style>
+:root{
+  --ink:#1F2D2A;--deep:#16332E;--teal:#157A6E;--teald:#0E5A50;--teall:#9AD4CA;
+  --card:#EEF4F2;--card2:#DCE9E6;--mute:#6B807A;--brick:#C8553D;--ochre:#B8863B;
+  --paper:#F5F7F6;--line:#D4DEDB;
+  --num:"Calibri","Segoe UI",system-ui,sans-serif;
+  --sans:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+.wrap{max-width:800px;margin:0 auto;padding:0 16px 70px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+
+.top{background:var(--deep);color:#fff}
+.top .in{max-width:800px;margin:0 auto;padding:24px 16px 20px}
+.eyebrow{font-family:var(--num);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--teall);margin:0 0 8px}
+.top h1{margin:0;font-size:22px;font-weight:700;line-height:1.35}
+.top p{margin:7px 0 0;color:#A9C9C1;font-size:13px;line-height:1.7}
+
+.idbar{background:#fff;border-bottom:1px solid var(--line)}
+.idbar .in{max-width:800px;margin:0 auto;padding:13px 16px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:11px}
+.f label{display:block;font-size:10.5px;letter-spacing:.09em;color:var(--mute);
+  text-transform:uppercase;font-family:var(--num);margin-bottom:4px}
+.f input,.f select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:3px;
+  font-family:inherit;font-size:14px;color:var(--ink);background:#fff}
+.f input:focus,.f select:focus{outline:2px solid var(--teal);outline-offset:-1px}
+.f input[readonly]{background:var(--card);color:var(--teald)}
+.src{font-size:9.5px;letter-spacing:0;text-transform:none;color:var(--teal);font-weight:700}
+.src.warn{color:var(--brick)}
+.rosterbar{max-width:800px;margin:0 auto;padding:0 16px}
+.rosterbar .in{margin-top:10px;padding:8px 11px;border-radius:4px;background:var(--card);
+  font-size:12px;color:var(--mute);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rosterbar button{padding:4px 10px;font-size:12px;font-weight:400}
+
+.tally{position:sticky;top:0;z-index:30;background:rgba(31,45,42,.97);color:#fff;
+  border-bottom:2px solid var(--teal);backdrop-filter:blur(6px)}
+.tally .in{max-width:800px;margin:0 auto;padding:9px 16px;display:flex;gap:20px;
+  align-items:center;flex-wrap:wrap;font-size:12px}
+.tally .lab{color:var(--teall)}
+.tally b{font-family:var(--num);font-size:22px;font-weight:700;margin-left:6px}
+.tally .of{font-family:var(--num);font-size:10.5px;color:#8FB0A9;margin-left:3px}
+.warn{margin-left:auto;font-size:11.5px;font-weight:700;background:var(--brick);color:#fff;
+  padding:3px 8px;border-radius:2px}
+
+.legend{margin-top:16px;padding:11px 13px;background:var(--card);border-radius:4px;
+  font-size:12.5px;line-height:1.9;color:var(--ink)}
+.legend b{font-family:var(--num);color:var(--teald)}
+.legend .sm{color:var(--mute);font-size:11.5px}
+
+h2.st{margin:28px 0 0;padding-bottom:8px;border-bottom:2px solid var(--ink);
+  font-size:18px;display:flex;align-items:baseline;gap:10px}
+h2.st span.r{font-family:var(--num);font-size:11px;letter-spacing:.18em;color:var(--teal)}
+h2.st span.m{margin-left:auto;font-size:11.5px;color:var(--mute);font-family:var(--num);font-weight:400}
+
+.dom{margin-top:13px;background:#fff;border:1px solid var(--line);border-radius:4px;
+  border-left:3px solid var(--line);padding-bottom:11px}
+.dom.s1,.dom.s2{border-left-color:var(--brick)}
+.dom.s3{border-left-color:var(--ochre)}
+.dom.s4,.dom.s5{border-left-color:var(--teal)}
+.dh{padding:11px 14px 0;font-weight:700;font-size:15.5px}
+.anch{margin:8px 14px 0;border:1px solid #EDF2F0;border-radius:3px;overflow:hidden}
+.ar{display:flex;gap:10px;padding:6px 10px;font-size:12.5px;line-height:1.6;
+  border-top:1px solid #EDF2F0;color:var(--mute)}
+.ar:first-child{border-top:none}
+.ar b{font-family:var(--num);color:var(--teald);flex:0 0 auto;font-size:13px}
+.scale{display:flex;margin:11px 14px 0;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label{flex:1;text-align:center;padding:10px 0;font-family:var(--num);font-size:16px;
+  background:#fff;color:var(--mute);border-left:1px solid var(--line);cursor:pointer;user-select:none}
+.scale label:first-of-type{border-left:none}
+.scale label:hover{background:var(--card)}
+.scale input:focus-visible+label{outline:2px solid var(--teal);outline-offset:-2px}
+.scale input[value="1"]:checked+label,.scale input[value="2"]:checked+label{background:var(--brick);color:#fff}
+.scale input[value="3"]:checked+label{background:var(--ochre);color:#fff}
+.scale input[value="4"]:checked+label,.scale input[value="5"]:checked+label{background:var(--teal);color:#fff}
+
+.blk{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.bh{padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line);
+  font-weight:700;font-size:14.5px;display:flex;align-items:baseline;gap:9px}
+.bh small{font-weight:400;color:var(--mute);font-size:11.5px;font-family:var(--num);margin-left:auto}
+.row{display:flex;gap:11px;align-items:center;padding:9px 14px;border-bottom:1px solid #EDF2F0;
+  font-size:13.5px;line-height:1.55}
+.row:last-child{border-bottom:none}
+.row .t{flex:1}
+.yn{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;flex:0 0 auto}
+.yn input{position:absolute;opacity:0;pointer-events:none}
+.yn label{padding:6px 11px;font-size:12.5px;background:#fff;color:var(--mute);cursor:pointer;
+  border-left:1px solid var(--line);user-select:none;font-family:var(--num)}
+.yn label:first-of-type{border-left:none}
+.yn label:hover{background:var(--card)}
+.yn input[value="y"]:checked+label{background:var(--teal);color:#fff}
+.yn input[value="n"]:checked+label{background:var(--brick);color:#fff}
+.yn input[value="na"]:checked+label{background:var(--mute);color:#fff}
+
+.out{margin-top:30px;background:var(--deep);color:#fff;border-radius:5px;padding:22px 20px}
+.out h2{margin:0 0 3px;font-size:18px}
+.out .sub{color:#A9C9C1;font-size:12.5px;margin:0 0 18px;line-height:1.7}
+.pr{display:grid;grid-template-columns:108px 1fr 26px;gap:9px;align-items:center;
+  margin-bottom:6px;font-size:12.5px}
+.pr .pn{color:#DCE9E6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ptr{height:13px;background:#2E4B45;border-radius:2px;overflow:hidden}
+.pf{height:100%;width:0;background:var(--teall);transition:width .25s ease}
+.pr .pv{font-family:var(--num);font-weight:700;text-align:right}
+.alert{background:var(--brick);color:#fff;padding:11px 13px;border-radius:4px;font-size:13px;
+  line-height:1.7;margin:16px 0 0}
+.alert b{display:block;margin-bottom:3px}
+.gs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;
+  margin-top:20px;padding-top:18px;border-top:1px solid #2F4A44}
+.gs .f label{color:#A9C9C1}
+.gs .f select{width:100%;padding:8px;border:1px solid #3A554F;border-radius:3px;
+  background:#22403A;color:#fff;font-family:inherit;font-size:14px}
+.gs .f select:focus{outline:2px solid var(--teall);outline-offset:-1px}
+.epahint{grid-column:1/-1;font-size:11.5px;color:#8FB0A9;line-height:1.7;margin:0}
+
+.acts{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.acts2{margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font-family:inherit;font-size:14px;padding:10px 17px;border-radius:3px;cursor:pointer;
+  border:1px solid var(--teald);background:var(--teal);color:#fff;font-weight:700}
+button:hover{background:var(--teald)}
+button:disabled{opacity:.55;cursor:not-allowed}
+button.g{background:#fff;color:var(--teald);border-color:var(--line)}
+button.g:hover{background:var(--card)}
+button.d{background:#fff;color:var(--brick);border-color:#E3C7C0}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.toast{font-size:12.5px;color:var(--teald);line-height:1.6}
+.toast.err{color:var(--brick)}
+#rep{margin-top:16px;display:none}
+#rep textarea{width:100%;min-height:300px;padding:13px;border:1px solid var(--line);border-radius:4px;
+  font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.7;background:#fff;color:var(--ink)}
+.pending{margin-top:12px;padding:10px 13px;background:#FCF9F2;border:1px solid var(--ochre);
+  border-radius:4px;font-size:12.5px;line-height:1.7;display:none}
+.pending b{color:#8A6420}
+footer{margin-top:32px;padding-top:15px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--mute);line-height:1.85}
+/* ---------- 手機最佳化 ---------- */
+@media (max-width:520px){
+  body{font-size:16px}
+  .wrap,.top .in,.idbar .in,.tally .in,.rosterbar{padding-left:12px;padding-right:12px}
+  /* 16px 以下 iOS 聚焦會自動放大整頁 */
+  .f input,.f select,.gs .f select{font-size:16px;padding:12px 10px}
+  .idbar .in{grid-template-columns:1fr 1fr;gap:9px}
+  .scale label{padding:14px 0;font-size:19px}
+  .yn{width:100%}
+  .yn label{flex:1;text-align:center;padding:12px 6px;font-size:14px}
+  .row{flex-direction:column;align-items:stretch;gap:8px}
+  .row .t{font-size:14.5px}
+  .acts{position:sticky;bottom:0;background:rgba(245,247,246,.97);backdrop-filter:blur(6px);
+    margin:18px -12px 0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);z-index:20}
+  .acts button{flex:1 1 100%}
+  .acts2 button{flex:1 1 30%}
+  .toast{flex:1 1 100%;order:-1;text-align:center;padding-bottom:2px}
+  .pr{grid-template-columns:92px 1fr 24px;gap:7px;font-size:12px}
+  .ar{font-size:12.5px}
+  .top h1{font-size:20px}
+  .out{padding:18px 15px}
+}
+@media (pointer:coarse){
+  .yn label{padding:12px 14px;font-size:14px}
+  .scale label{padding:14px 0;font-size:18px}
+  button{min-height:46px;padding:12px 16px}
+  .f input,.f select,.gs .f select{min-height:44px;font-size:16px}
+}
+@media print{
+  .tally,.acts,.pending,.scale label,.yn label{display:none!important}
+  body{background:#fff;font-size:10.5pt}
+  .top,.out{background:#fff!important;color:#000!important}
+  .top .eyebrow,.top p,.out .sub,.pr .pn{color:#333!important}
+  .gs .f select,.ptr{background:#F0F0F0!important;color:#000!important}
+  .scale input:checked+label,.yn input:checked+label{display:block!important;background:#000!important;color:#fff!important}
+  .pf{background:#666!important}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="in">
+  <p class="eyebrow">Emergency Medicine · PGY · Faculty Score Sheet v4</p>
+  <h1>呼吸道整合能力評分單</h1>
+  <p>教師只評分數：九面向 1–5、五項安全勾選、首次插管成功、GRS 與 EPA。
+     具體行為描述由助理端回饋表完成，兩份以人事號與日期配對後合併。
+     <b>本表不直接給學員</b>；送出後寫入試算表並自動寄出一份備份信。</p>
+</div></div>
+
+<div class="idbar"><div class="in">
+  <div class="f"><label>學年度 <span class="src" id="yrSrc">依日期</span></label>
+       <select id="yr"></select></div>
+  <div class="f"><label>人事號</label><input id="eid" type="text" autocomplete="off"
+       placeholder="輸入即帶入姓名" list="eidList" inputmode="latin" autocapitalize="characters">
+       <datalist id="eidList"></datalist></div>
+  <div class="f"><label>姓名 <span id="nameSrc" class="src"></span></label>
+       <input id="stu" type="text" autocomplete="off" placeholder="自動帶入"></div>
+  <div class="f"><label>職級</label><select id="lvl"><option>PGY1</option><option>PGY2</option></select></div>
+  <div class="f"><label>施測次序</label><select id="rnd"><option>第一次</option><option>第二次</option><option>第三次</option></select></div>
+  <div class="f"><label>評分者</label><input id="rater" type="text" autocomplete="off"
+       list="raterList"><datalist id="raterList"></datalist></div>
+  <div class="f"><label>日期</label><input id="dt" type="date"></div>
+</div></div>
+
+<div class="tally"><div class="in">
+  <span><span class="lab">呼吸困難</span><b class="num" id="t1">—</b><span class="of" id="n1">0/5</span></span>
+  <span><span class="lab">插管</span><b class="num" id="t2">—</b><span class="of" id="n2">0/4</span></span>
+  <span id="wbox"></span>
+</div></div>
+
+<div class="rosterbar"><div class="in" id="rosterBar">名冊載入中…</div></div>
+
+<div class="wrap">
+  <div class="legend">
+    <b>1</b> 需重新訓練　<b>2</b> 需加強　<b>3</b> 合格　<b>4</b> 良好　<b>5</b> 優秀
+    <div class="sm">各面向下方列出 1／3／5 的行為描述；<b>2</b> 與 <b>4</b> 表示介於相鄰兩者之間。</div>
+  </div>
+
+  <div id="body"></div>
+
+  <div class="out" id="out">
+    <h2>結果</h2>
+    <p class="sub">分數與 EPA 由教師評定。送出後寫入試算表（可在試算表中修改）並寄出備份信；
+      學員收到的回饋以合併後的版本為準。</p>
+    <div id="prof"></div>
+    <div id="alert"></div>
+    <div class="gs">
+      <div class="f"><label>全面性整體評分 GRS</label><select id="grs">
+        <option value="">— 選擇 —</option>
+        <option value="1">1　不合格，需重新訓練</option>
+        <option value="2">2　邊緣</option>
+        <option value="3">3　合格</option>
+        <option value="4">4　良好</option>
+        <option value="5">5　優秀</option></select></div>
+      <div class="f"><label>EPA　呼吸困難評估</label><select id="e1" class="epa">
+        <option value="">— 選擇 —</option><option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option></select></div>
+      <div class="f"><label>EPA　氣管內管插管</label><select id="e2" class="epa">
+        <option value="">— 選擇 —</option><option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option></select></div>
+      <p class="epahint">EPA 以本表為準。助理端回饋表亦有 EPA 欄位，合併時以教師評定覆蓋。
+        1 僅可在旁觀看／2 需 VS 在旁監督／3 VS 需立即可到／4 事後報備即可／5 可督導他人。</p>
+    </div>
+  </div>
+
+  <div class="acts">
+    <button type="button" id="btnSend" onclick="send()">送出並寄備份</button>
+    <span class="toast" id="toast"></span>
+  </div>
+  <div class="acts2">
+    <button type="button" class="g" onclick="mk()">產生文字紀錄</button>
+    <button type="button" class="g" onclick="window.print()">列印／PDF</button>
+    <button type="button" class="d" onclick="rs()">清除</button>
+  </div>
+  <div class="pending" id="pending"></div>
+  <div id="rep"><textarea id="rt" readonly></textarea></div>
+
+  <footer>
+    站別分數 = Σ得分 ÷ (5 × 已評面向數) × 100。形成性評估，未設及格線。<br>
+    安全關鍵項與首次插管成功不計入分數；安全項未達成會單獨標示，並列為下次施測前的必改項目。
+  </footer>
+</div>
+
+<script src="common.js"></script>
+<script>
+const D=[
+{s:1,id:"hx",n:"病史收集",a:{
+ 1:"僅問一般症狀，未針對鑑別診斷；危急時仍照順序問完才處置",
+ 3:"能針對可能診斷問部分重點症狀，但缺一至兩類（體液／缺血／感染）",
+ 5:"重點式問診並與處置平行進行，涵蓋感染、心衰、缺血三類與用藥史"}},
+{s:1,id:"pe",n:"理學檢查",a:{
+ 1:"檢查零散、未呼應臆斷；生命徵象監測不積極",
+ 3:"檢查有呼應臆斷，但體液或呼吸道評估缺一項",
+ 5:"呼吸功、雙側肺野、體液狀態、呼吸道分泌物皆完整，並具體描述所見"}},
+{s:1,id:"tx",n:"處置與治療",a:{
+ 1:"反應慢，問完診才調整給氧；或氧氣策略使實質 FiO₂ 反而下降",
+ 3:"有升階氧氣但策略保守，或未保留反應時間即再次調整",
+ 5:"先矯正低血氧再完成問診；高濃度起始依反應下調，並保留觀察期評估"}},
+{s:1,id:"lab",n:"檢驗檢查",a:{
+ 1:"未開立 ABG，或檢查項目與臆斷無關",
+ 3:"有開立 ABG 但判讀不完整（未說明 P/F ratio 或 CO₂ 狀態）",
+ 5:"ABG、CXR、血液生化整合判讀正確，並與舊片及臨床表現結合"}},
+{s:1,id:"ho",n:"交班報告",a:{
+ 1:"僅報告數據，缺基本資訊與評估結論，組織缺乏邏輯",
+ 3:"結構大致完整，但未說出整合後的評估結論",
+ 5:"ISBAR 結構完整，含評估結論、已執行處置與反應、下一步計畫"}},
+{s:2,id:"prep",n:"插管前準備",a:{
+ 1:"器械未備齊即進入插管；未執行 preoxygenation",
+ 3:"器械大致齊全，但擺位或 BVM 密合度不佳",
+ 5:"器械逐項確認、擺位正確、preoxygenation 確實且方式正確"}},
+{s:2,id:"med",n:"藥物給予",a:{
+ 1:"未確認血壓與體重；漏給鎮靜或劑量錯誤",
+ 3:"藥物選擇正確，但醫囑要素不全或與備物銜接不順",
+ 5:"確認血壓體重；藥物、劑量、途徑、時機完整且時序正確"}},
+{s:2,id:"tech",n:"插管技術",a:{
+ 1:"無法有效暴露聲門或反覆中斷；掉血氧未中止操作",
+ 3:"可完成插管但 blade 過深或握管位置不當，動作不流暢",
+ 5:"一次到位、動作流暢、深度正確；掉血氧能立即中止並給氧"}},
+{s:2,id:"post",n:"插管後評估",a:{
+ 1:"未確認位置即接上呼吸器；未監測生命徵象",
+ 3:"有確認位置但依賴數值而非波形，或漏掉 CXR／聽診",
+ 5:"波形確認、五點聽診、生命徵象、CXR、ABG、回到病因處置皆完整"}}
+];
+
+const SAFE=[
+ ["s1","升階氧氣優先於完成問診（低血氧先處理）",["y","n"]],
+ ["s2","Preoxygenation 給滿 3 分鐘且方式正確",["y","n"]],
+ ["s3","給藥前確認血壓",["y","n"]],
+ ["s4","掉血氧時中止操作並以 BVM 給氧",["y","n","na"]],
+ ["s5","以 EtCO₂ 波形確認管路位置",["y","n"]]
+];
+
+function build(){
+  let h="";
+  [1,2].forEach(s=>{
+    h+=`<h2 class="st"><span class="r">${s===1?"I":"II"}</span>${
+      s===1?"急性呼吸困難評估":"放置氣管內管技術"}<span class="m">${s===1?"5 面向":"4 面向"}</span></h2>`;
+    D.filter(d=>d.s===s).forEach(d=>{
+      h+=`<div class="dom" id="dom_${d.id}">
+        <div class="dh">${d.n}</div>
+        <div class="anch">${[1,3,5].map(k=>
+          `<div class="ar"><b>${k}</b><span>${d.a[k]}</span></div>`).join("")}</div>
+        <div class="scale">${[1,2,3,4,5].map(v=>
+          `<input type="radio" id="${d.id}_${v}" name="${d.id}" value="${v}"><label for="${d.id}_${v}">${v}</label>`).join("")}</div>
+      </div>`;
+    });
+    if(s===2){
+      h+=`<div class="blk"><div class="bh">安全關鍵項<small>不計分 · 未達成須列為必改項目</small></div>
+        ${SAFE.map(([id,txt,opts])=>`<div class="row"><span class="t">${txt}</span>
+          <span class="yn">${opts.map(o=>`<input type="radio" id="${id}_${o}" name="${id}" value="${o}">
+            <label for="${id}_${o}">${o==="y"?"是":o==="n"?"否":"未發生"}</label>`).join("")}</span></div>`).join("")}
+      </div>
+      <div class="blk"><div class="bh">客觀記錄<small>不計分 · 用於縱向比較</small></div>
+        <div class="row"><span class="t">首次嘗試即插管成功</span>
+          <span class="yn"><input type="radio" id="m1_y" name="m1" value="y"><label for="m1_y">是</label>
+          <input type="radio" id="m1_n" name="m1" value="n"><label for="m1_n">否</label></span></div>
+      </div>`;
+    }
+  });
+  document.getElementById("body").innerHTML=h;
+
+  document.addEventListener("change",e=>{if(e.target.matches("input,select"))calc();});
+  calc();
+  initCommon({page:"score"});
+}
+
+const val=n=>{const x=document.querySelector(`input[name="${n}"]:checked`);return x?x.value:null;};
+
+function calc(){
+  const S={1:{sum:0,n:0},2:{sum:0,n:0}};
+  D.forEach(d=>{
+    const v=val(d.id);
+    document.getElementById("dom_"+d.id).className="dom"+(v?" s"+v:"");
+    if(v){S[d.s].sum+=+v;S[d.s].n++;}
+  });
+  [1,2].forEach(s=>{
+    S[s].pc = S[s].n? Math.round(S[s].sum/(5*S[s].n)*1000)/10 : null;
+    document.getElementById("t"+s).textContent = S[s].pc===null?"—":S[s].pc;
+    document.getElementById("n"+s).textContent = "已評 "+S[s].n+"/"+(s===1?5:4);
+  });
+
+  const bad=SAFE.filter(([id])=>val(id)==="n").map(([,t])=>t);
+  document.getElementById("wbox").innerHTML = bad.length
+    ? `<span class="warn">安全項未達成 ${bad.length} 項</span>` : "";
+  document.getElementById("alert").innerHTML = bad.length
+    ? `<div class="alert"><b>安全關鍵項未達成（${bad.length} 項）— 須列為下次施測前的必改項目</b>
+       ${bad.map(x=>"· "+x).join("<br>")}</div>` : "";
+
+  let p="";
+  D.forEach(d=>{
+    const v=val(d.id), w=v?(+v)/5*100:0;
+    p+=`<div class="pr"><span class="pn">${d.s===1?"I":"II"}·${d.n}</span>
+      <span class="ptr"><span class="pf" style="width:${w}%;background:${
+        !v?"#2E4B45":(+v>=4?"var(--teall)":(+v==3?"#D9B26A":"#E08C78"))}"></span></span>
+      <span class="pv">${v||"—"}</span></div>`;
+  });
+  document.getElementById("prof").innerHTML=p;
+  return S;
+}
+
+function payload(){
+  const S=calc(), hit=ROSTER[g("eid").toUpperCase()]||{}, o={
+    kind:"score", ts:new Date().toISOString(),
+    year:g("yr"), eid:g("eid").toUpperCase(), name:g("stu"), batch:hit.batch||"",
+    level:g("lvl"), round:g("rnd"), rater:g("rater"), date:g("dt")
+  };
+  D.forEach(d=>o[d.id]=val(d.id)||"");
+  o.st1=S[1].pc===null?"":S[1].pc; o.st2=S[2].pc===null?"":S[2].pc;
+  SAFE.forEach(([id])=>o[id]=val(id)||"");
+  o.first=val("m1")||""; o.grs=g("grs"); o.epa1=g("e1"); o.epa2=g("e2");
+  return o;
+}
+
+function missing(){
+  const m=[];
+  if(!g("eid")) m.push("人事號");
+  if(!g("dt")) m.push("日期");
+  const un=D.filter(d=>!val(d.id)).length;
+  if(un) m.push(un+" 個面向未評");
+  if(!g("e1")||!g("e2")) m.push("EPA");
+  return m;
+}
+
+async function send(){
+  const m=missing();
+  if(m.length && !confirm("尚未完成："+m.join("、")+"。仍要送出嗎？")) return;
+  const o=payload();
+  const btn=document.getElementById("btnSend"); btn.disabled=true;
+  pushPending(o); showPending();
+  try{
+    await postGAS(o); dropPending(o.ts); showPending();
+    toast("已送出並寄出備份："+(o.name||o.eid));
+  }catch(e){
+    toast("送出失敗，已存在本機，稍後可重送。"+(GAS_URL?"":"（尚未設定 GAS_URL）"),true);
+  }finally{ btn.disabled=false; }
+}
+
+function mk(){
+  const S=calc(), L=[];
+  L.push("═══ 呼吸道整合能力評分紀錄（教師端）═══","");
+  L.push(`${g("yr")} 學年度　${g("lvl")}　${g("rnd")}施測`);
+  L.push(`人事號 ${g("eid")||"—"}　姓名 ${g("stu")||"—"}`);
+  L.push(`評分者 ${g("rater")||"—"}　日期 ${g("dt")||"—"}`,"");
+  [1,2].forEach(s=>{
+    L.push("─".repeat(40));
+    L.push(`【${s===1?"急性呼吸困難評估":"放置氣管內管技術"}】　${
+      S[s].pc===null?"未評":S[s].pc+"%"}　(${S[s].sum}／${5*S[s].n||0})`);
+    D.filter(d=>d.s===s).forEach(d=>L.push(`　${d.n}：${val(d.id)||"—"} / 5`));
+    L.push("");
+  });
+  L.push("─".repeat(40),"【安全關鍵項】");
+  SAFE.forEach(([id,txt])=>{const v=val(id);
+    L.push(`　${v==="y"?"[✓]":v==="n"?"[✗]":v==="na"?"[—]":"[ ]"} ${txt}`);});
+  L.push("",`　首次嘗試即插管成功：${val("m1")==="y"?"是":val("m1")==="n"?"否":"—"}`);
+  L.push("","【整體評估】");
+  L.push(`　GRS：${g("grs")||"—"}　EPA 呼吸困難：${g("e1")||"—"}　EPA 插管：${g("e2")||"—"}`);
+  L.push("","─".repeat(40),"本表不直接給學員；回饋文字由助理端產出，合併後寄送。");
+  document.getElementById("rt").value=L.join("\n");
+  const b=document.getElementById("rep"); b.style.display="block";
+  b.scrollIntoView?.({behavior:"smooth",block:"start"});
+  toast("已產生文字紀錄");
+}
+function rs(){if(!confirm("清除本份評分？此動作無法復原。"))return;
+  document.querySelectorAll("input[type=radio]").forEach(x=>x.checked=false);
+  document.querySelectorAll("input[type=text]").forEach(x=>x.value="");
+  document.querySelectorAll("#grs,.epa").forEach(s=>s.value="");
+  document.getElementById("rep").style.display="none";
+  calc(); toast("已清除"); window.scrollTo?.({top:0,behavior:"smooth"});}
+build();
+</script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>急救課程　Dashboard</title>
+<style>
+:root{
+  --ink:#1F2D2A;--deep:#16332E;--teal:#157A6E;--teald:#0E5A50;--teall:#9AD4CA;
+  --card:#EEF4F2;--card2:#DCE9E6;--mute:#6B807A;--brick:#C8553D;--ochre:#B8863B;
+  --paper:#F5F7F6;--line:#D4DEDB;
+  --num:"Calibri","Segoe UI",system-ui,sans-serif;
+  --sans:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 60px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums}
+.top{background:var(--deep);color:#fff}
+.top .in{max-width:1040px;margin:0 auto;padding:22px 16px 18px;
+  display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.top h1{margin:0;font-size:21px;font-weight:700}
+.top .eyebrow{font-family:var(--num);font-size:10.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--teall);margin:0 0 6px}
+.top .ctl{margin-left:auto;display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap}
+.ctl .f label{display:block;font-size:10px;letter-spacing:.09em;color:#A9C9C1;
+  text-transform:uppercase;font-family:var(--num);margin-bottom:4px}
+.ctl select,.ctl input{padding:7px 9px;border:1px solid #3A554F;border-radius:3px;
+  background:#22403A;color:#fff;font-family:inherit;font-size:14px;min-width:112px}
+.ctl select:focus,.ctl input:focus{outline:2px solid var(--teall);outline-offset:-1px}
+.ctl button{padding:8px 13px;border-radius:3px;border:1px solid #3A554F;background:#22403A;
+  color:#fff;font-family:inherit;font-size:13px;cursor:pointer}
+.ctl button:hover{background:var(--teal);border-color:var(--teal)}
+.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.tabs .in{max-width:1040px;margin:0 auto;padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+.tabs button{background:none;border:none;border-bottom:3px solid transparent;padding:12px 14px;
+  font-family:inherit;font-size:14px;color:var(--mute);cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--teald);border-bottom-color:var(--teal);font-weight:700}
+.tabs button:hover{background:var(--card)}
+.status{max-width:1040px;margin:0 auto;padding:10px 16px 0;font-size:12px;color:var(--mute)}
+.pane{display:none}.pane.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:4px;padding:13px 15px;
+  border-left:3px solid var(--teal)}
+.kpi .k{font-size:11px;color:var(--mute);letter-spacing:.06em}
+.kpi .v{font-family:var(--num);font-size:29px;font-weight:700;line-height:1.15;margin-top:3px}
+.kpi .v small{font-size:14px;font-weight:400;color:var(--mute)}
+.kpi .s{font-size:11.5px;color:var(--mute);margin-top:2px}
+.kpi.warn{border-left-color:var(--brick)}.kpi.warn .v{color:var(--brick)}
+.card{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:4px}
+.ch{padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card);
+  font-weight:700;font-size:15px;display:flex;align-items:baseline;gap:10px}
+.ch small{margin-left:auto;font-weight:400;color:var(--mute);font-size:11.5px}
+.cb{padding:14px 15px}
+.bar{display:grid;grid-template-columns:170px 1fr 78px;gap:11px;align-items:center;
+  margin-bottom:8px;font-size:13px}
+.bar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr{position:relative;height:17px;background:var(--card);border-radius:2px;overflow:hidden}
+.fl{height:100%;background:var(--teal);transition:width .3s ease}
+.bar .v{font-family:var(--num);font-size:12.5px;font-weight:700;text-align:right;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 10px;border-bottom:1px solid #EDF2F0;text-align:left}
+th{background:var(--card);font-size:12px;color:var(--mute);letter-spacing:.05em;
+  position:sticky;top:0;font-weight:700}
+td.n,th.n{text-align:right;font-family:var(--num)}
+tbody tr:hover{background:#FBFCFC}
+.scroll{max-height:480px;overflow:auto}
+.pill{display:inline-block;font-family:var(--num);font-size:11px;font-weight:700;
+  padding:2px 7px;border-radius:10px}
+.p-hi{background:var(--card2);color:var(--teald)}
+.p-md{background:#FCF4E3;color:#8A6420}
+.p-lo{background:#F7E2DC;color:var(--brick)}
+.empty{padding:28px 15px;text-align:center;color:var(--mute);font-size:13.5px;line-height:1.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.quote{padding:9px 0;border-top:1px solid #F2F6F5;font-size:13px;line-height:1.65}
+.quote:first-child{border-top:none}
+.quote .who{font-size:11px;color:var(--mute);font-family:var(--num);margin-top:3px}
+@media (max-width:640px){
+  .top .in{flex-direction:column;align-items:stretch}
+  .top .ctl{margin-left:0;width:100%}.ctl .f{flex:1 1 45%}
+  .ctl select,.ctl input{width:100%;min-width:0;font-size:16px;padding:11px 9px}
+  .bar{grid-template-columns:118px 1fr 58px;gap:8px;font-size:12px}
+  th,td{padding:7px 6px;font-size:12.5px}
+}
+@media (pointer:coarse){ .tabs button{padding:14px 15px} .ctl button{min-height:44px} }
+</style>
+</head>
+<body>
+
+<div class="top"><div class="in">
+  <div><p class="eyebrow">Emergency Medicine · PGY</p><h1>急救課程　Dashboard</h1></div>
+  <div class="ctl">
+    <div class="f"><label>學年度</label><select id="fYear"></select></div>
+    <div class="f"><label>梯次</label><select id="fBatch"></select></div>
+    <div class="f"><label>課程</label><select id="fCourse"></select></div>
+    <button type="button" onclick="reload(true)">重新整理</button>
+  </div>
+</div></div>
+
+<div class="tabs"><div class="in">
+  <button class="on" data-p="overview">總覽</button>
+  <button data-p="courses">各課程</button>
+  <button data-p="students">學員完課</button>
+  <button data-p="feedback">課程回饋</button>
+  <button data-p="faculty">師資</button>
+</div></div>
+
+<div class="status" id="status">載入中…</div>
+
+<div class="wrap">
+  <div class="pane on" id="p-overview"></div>
+  <div class="pane" id="p-courses"></div>
+  <div class="pane" id="p-students"></div>
+  <div class="pane" id="p-feedback"></div>
+  <div class="pane" id="p-faculty"></div>
+</div>
+
+<script src="common.js"></script>
+<script>
+const CACHE_KEY="courseDashCache";
+let RAW={sessions:[],attendance:[],roster:[],faculty:[],feedback:[]};
+
+async function reload(force){
+  const st=document.getElementById("status");
+  if(!force){
+    try{
+      const c=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
+      if(c&&c.data){RAW=c.data;render();
+        st.textContent=`顯示本機快取（${new Date(c.at).toLocaleString("zh-TW")}），背景更新中…`;}
+    }catch(e){}
+  }
+  if(!GAS_URL){st.textContent="尚未設定 GAS_URL，無法連線試算表。";return;}
+  try{
+    const r=await fetch(GAS_URL+"?action=course",{method:"GET"});
+    const j=await r.json();
+    RAW={sessions:j.sessions||[],attendance:j.attendance||[],roster:j.roster||[],
+         faculty:j.faculty||[],feedback:j.feedback||[]};
+    localStorage.setItem(CACHE_KEY,JSON.stringify({at:Date.now(),data:RAW}));
+    render();
+    st.textContent=`資料更新於 ${new Date().toLocaleString("zh-TW")}　·　`+
+      `場次 ${RAW.sessions.length}　學員 ${RAW.roster.length}　回饋 ${RAW.feedback.length}`;
+  }catch(e){ st.textContent="連線失敗，顯示的是本機快取。"; }
+}
+
+const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n;};
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const uniq=a=>[...new Set(a)].filter(Boolean).sort();
+
+function fillFilters(){
+  const set=(id,arr,all)=>{const s=document.getElementById(id),keep=s.value;
+    s.innerHTML=`<option value="">${all}</option>`+arr.map(x=>`<option>${x}</option>`).join("");
+    if([...s.options].some(o=>o.value===keep))s.value=keep;};
+  set("fYear",uniq(RAW.sessions.map(r=>String(r["學年度"]||""))).reverse(),"全部年度");
+  set("fBatch",uniq(RAW.sessions.map(r=>String(r["梯次"]||""))),"全部梯次");
+  set("fCourse",uniq(RAW.sessions.map(r=>String(r["課程"]||""))),"全部課程");
+}
+function fSess(){
+  const y=g("fYear"),b=g("fBatch"),c=g("fCourse");
+  return RAW.sessions.filter(s=>(!y||String(s["學年度"])===y)&&
+    (!b||String(s["梯次"])===b)&&(!c||String(s["課程"])===c));
+}
+function fFb(){
+  const y=g("fYear"),b=g("fBatch"),c=g("fCourse");
+  return RAW.feedback.filter(s=>(!y||String(s["學年度"])===y)&&
+    (!b||String(s["梯次"])===b)&&(!c||String(s["課程"])===c));
+}
+const SAT_COLS=["滿意_主題掌握與講解","滿意_技能提升","滿意_情境真實性",
+  "滿意_指導與即時回饋","滿意_自信心提升","滿意_支持與學習動力","滿意_整體"];
+const satAvg=r=>{const v=SAT_COLS.map(c=>num(r[c])).filter(x=>x!==null);return avg(v);};
+
+/* ---------- 總覽 ---------- */
+function paneOverview(){
+  const S=fSess(), F=fFb();
+  if(!S.length&&!F.length) return `<div class="card"><div class="empty">
+    此條件下沒有資料。<br>若剛建好試算表，請確認 Apps Script 已部署且分頁名稱正確。</div></div>`;
+  const done=S.filter(s=>String(s["狀態"]||"").includes("完成")||num(s["實到人數"])>0).length;
+  const should=S.reduce((a,s)=>a+(num(s["應到人數"])||0),0);
+  const actual=S.reduce((a,s)=>a+(num(s["實到人數"])||0),0);
+  const rate=should?Math.round(actual/should*100):null;
+  const sat=avg(F.map(satAvg).filter(x=>x!==null));
+  const fbRate=actual?Math.round(F.length/actual*100):null;
+
+  let h=`<div class="kpis">
+    <div class="kpi"><div class="k">課程場次</div><div class="v">${S.length}</div>
+      <div class="s">已完成 ${done} 場</div></div>
+    <div class="kpi"><div class="k">出席率</div>
+      <div class="v">${rate===null?"—":rate}<small>%</small></div>
+      <div class="s">${actual} / ${should} 人次</div></div>
+    <div class="kpi"><div class="k">平均滿意度</div>
+      <div class="v">${sat===null?"—":sat.toFixed(2)}<small>/5</small></div>
+      <div class="s">n=${F.length}</div></div>
+    <div class="kpi ${fbRate!==null&&fbRate<60?"warn":""}"><div class="k">回饋回收率</div>
+      <div class="v">${fbRate===null?"—":fbRate}<small>%</small></div>
+      <div class="s">${F.length} 份 / ${actual} 人次</div></div>
+  </div>`;
+
+  // 各課程出席率
+  const byC={};
+  S.forEach(s=>{const c=s["課程"]||"未分類";
+    byC[c]=byC[c]||{should:0,actual:0,n:0};
+    byC[c].should+=num(s["應到人數"])||0; byC[c].actual+=num(s["實到人數"])||0; byC[c].n++;});
+  h+=`<div class="card"><div class="ch">各課程出席率</div><div class="cb">`;
+  Object.entries(byC).sort((a,b)=>b[1].n-a[1].n).forEach(([c,v])=>{
+    const r=v.should?Math.round(v.actual/v.should*100):0;
+    h+=`<div class="bar"><span class="n">${c}</span>
+      <span class="tr"><span class="fl" style="width:${r}%;background:${
+        r>=90?"var(--teal)":r>=75?"var(--ochre)":"var(--brick)"}"></span></span>
+      <span class="v">${r}%　<span style="color:var(--line)">|</span> ${v.n}場</span></div>`;
+  });
+  h+=`</div></div>`;
+
+  // 滿意度七項
+  if(F.length){
+    h+=`<div class="card"><div class="ch">滿意度細項<small>1–5 分</small></div><div class="cb">`;
+    SAT_COLS.forEach(c=>{
+      const v=F.map(r=>num(r[c])).filter(x=>x!==null), m=avg(v);
+      h+=`<div class="bar"><span class="n">${c.replace("滿意_","")}</span>
+        <span class="tr"><span class="fl" style="width:${m?m/5*100:0}%;background:${
+          !m?"var(--card)":m>=4?"var(--teal)":m>=3.5?"var(--ochre)":"var(--brick)"}"></span></span>
+        <span class="v">${m?m.toFixed(2):"—"}</span></div>`;
+    });
+    h+=`</div></div>`;
+  }
+  return h;
+}
+
+/* ---------- 各課程 ---------- */
+function paneCourses(){
+  const S=fSess(), F=fFb();
+  if(!S.length) return `<div class="card"><div class="empty">此條件下沒有場次資料。</div></div>`;
+  return `<div class="card"><div class="ch">場次明細<small>依日期排序</small></div>
+  <div class="scroll"><table><thead><tr>
+    <th>日期</th><th>課程</th><th>梯</th><th>講師</th>
+    <th class="n">應到</th><th class="n">實到</th><th class="n">出席率</th>
+    <th class="n">滿意度</th><th class="n">回饋</th></tr></thead><tbody>`+
+  S.slice().sort((a,b)=>String(b["日期"]).localeCompare(String(a["日期"]))).map(s=>{
+    const should=num(s["應到人數"]), act=num(s["實到人數"]);
+    const r=should&&act!==null?Math.round(act/should*100):null;
+    const fb=F.filter(f=>String(f["場次"]||"")===String(s["場次ID"]||s["場次"]||"")||
+      (String(f["課程"])===String(s["課程"])&&String(f["梯次"])===String(s["梯次"])));
+    const sat=avg(fb.map(satAvg).filter(x=>x!==null));
+    return `<tr><td class="num">${fmtDate(s["日期"])}</td><td>${s["課程"]||""}</td>
+      <td>${s["梯次"]||""}</td><td>${s["講師"]||s["師資"]||""}</td>
+      <td class="n">${should??"—"}</td><td class="n">${act??"—"}</td>
+      <td class="n">${r===null?"—":`<span class="pill ${r>=90?"p-hi":r>=75?"p-md":"p-lo"}">${r}%</span>`}</td>
+      <td class="n">${sat?sat.toFixed(2):"—"}</td><td class="n">${fb.length||"—"}</td></tr>`;
+  }).join("")+`</tbody></table></div></div>`;
+}
+
+/* ---------- 學員完課 ---------- */
+function paneStudents(){
+  const y=g("fYear"), b=g("fBatch");
+  const R=RAW.roster.filter(r=>(!y||String(r["學年度"])===y)&&(!b||String(r["梯次"])===b));
+  if(!R.length) return `<div class="card"><div class="empty">此條件下沒有學員資料。</div></div>`;
+  const courses=uniq(RAW.sessions.map(s=>String(s["課程"]||"")));
+  const att={};
+  RAW.attendance.forEach(a=>{
+    const k=String(a["人事號"]||a["員工編號"]||"");
+    (att[k]=att[k]||new Set()).add(String(a["課程"]||""));
+  });
+  const rows=R.map(r=>{
+    const k=String(r["員工編號"]||r["人事號"]||"");
+    const got=att[k]||new Set();
+    const done=courses.filter(c=>got.has(c)).length;
+    return {k,name:r["姓名"],batch:r["梯次"],done,pc:courses.length?Math.round(done/courses.length*100):0,
+            miss:courses.filter(c=>!got.has(c))};
+  }).sort((a,b)=>a.pc-b.pc);
+
+  return `<div class="card"><div class="ch">學員完課狀況
+    <small>共 ${courses.length} 門課　·　依完課率由低至高</small></div>
+    <div class="scroll"><table><thead><tr>
+      <th>人事號</th><th>姓名</th><th>梯</th><th class="n">完課</th>
+      <th class="n">完課率</th><th>未完成</th></tr></thead><tbody>`+
+    rows.map(s=>`<tr><td class="num">${s.k}</td><td>${s.name||""}</td><td>${s.batch||""}</td>
+      <td class="n">${s.done}/${courses.length}</td>
+      <td class="n"><span class="pill ${s.pc>=100?"p-hi":s.pc>=70?"p-md":"p-lo"}">${s.pc}%</span></td>
+      <td style="font-size:12.5px;color:var(--mute)">${s.miss.join("、")||"—"}</td></tr>`).join("")+
+    `</tbody></table></div></div>`;
+}
+
+/* ---------- 課程回饋 ---------- */
+function paneFeedback(){
+  const F=fFb();
+  if(!F.length) return `<div class="card"><div class="empty">
+    此條件下沒有回饋資料。<br>回饋由問卷匯出後貼入「學員回饋」試算表。</div></div>`;
+  // 前後測比較
+  const pre=F.filter(r=>String(r["測驗別"])==="前"), post=F.filter(r=>String(r["測驗別"])==="後");
+  let h="";
+  if(pre.length&&post.length){
+    const eff=["EPA自評"].concat(Object.keys(F[0]).filter(k=>k.startsWith("效能_")));
+    h+=`<div class="card"><div class="ch">前後測比較
+      <small>前測 n=${pre.length}　後測 n=${post.length}</small></div><div class="cb">`;
+    eff.forEach(c=>{
+      const a=avg(pre.map(r=>num(r[c])).filter(x=>x!==null));
+      const b=avg(post.map(r=>num(r[c])).filter(x=>x!==null));
+      if(a===null||b===null) return;
+      h+=`<div class="bar"><span class="n">${c.replace("效能_","")}</span>
+        <span class="tr">
+          <span class="fl" style="width:${b/5*100}%;background:var(--teal)"></span>
+          <span class="fl" style="position:absolute;top:0;left:0;width:${a/5*100}%;
+            background:var(--teall);opacity:.9;height:8px"></span></span>
+        <span class="v">${a.toFixed(1)} → ${b.toFixed(1)}
+          <span style="color:${b>a?"var(--teald)":"var(--brick)"}">${b>a?"▲":"▼"}${Math.abs(b-a).toFixed(1)}</span></span></div>`;
+    });
+    h+=`<div style="font-size:11.5px;color:var(--mute);margin-top:8px">
+      淺色＝前測　深色＝後測</div></div></div>`;
+  }
+  // EPA 自評分布
+  const e=F.map(r=>num(r["EPA自評"])).filter(x=>x!==null);
+  if(e.length){
+    h+=`<div class="card"><div class="ch">EPA 自評分布<small>n=${e.length}　平均 ${avg(e).toFixed(2)}</small></div><div class="cb">`;
+    [1,2,3,4,5].forEach(lv=>{
+      const c=e.filter(x=>x===lv).length, pc=Math.round(c/e.length*100);
+      h+=`<div class="bar"><span class="n">等級 ${lv}</span>
+        <span class="tr"><span class="fl" style="width:${pc}%"></span></span>
+        <span class="v">${c} 人 ${pc}%</span></div>`;
+    });
+    h+=`</div></div>`;
+  }
+  // 開放題
+  const OPEN=["Q1","Q2","Q3","Q4"];
+  h+=`<div class="card"><div class="ch">開放式回饋<small>最近 ${Math.min(F.length,40)} 筆</small></div><div class="cb">`;
+  const has=OPEN.filter(q=>F.some(r=>String(r[q]||"").trim()));
+  if(!has.length) h+=`<div class="empty" style="padding:12px 0">尚無開放題內容。</div>`;
+  else has.forEach(q=>{
+    const items=F.filter(r=>String(r[q]||"").trim()).slice(-40);
+    h+=`<div style="font-size:12.5px;font-weight:700;color:var(--teald);margin:14px 0 4px;
+      padding-top:10px;border-top:1px solid var(--line)">${q}　
+      <span style="font-weight:400;color:var(--mute)">${items.length} 則</span></div>`;
+    items.forEach(r=>h+=`<div class="quote">${String(r[q]).replace(/\n/g,"<br>")}
+      <div class="who">${r["課程"]||""}　${r["梯次"]||""}梯　${r["職級"]||""}</div></div>`);
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
+/* ---------- 師資 ---------- */
+function paneFaculty(){
+  const S=fSess(), F=fFb();
+  const by={};
+  S.forEach(s=>{
+    const t=String(s["講師"]||s["師資"]||"").trim(); if(!t) return;
+    by[t]=by[t]||{n:0,courses:new Set(),act:0};
+    by[t].n++; by[t].courses.add(s["課程"]||""); by[t].act+=num(s["實到人數"])||0;
+  });
+  if(!Object.keys(by).length) return `<div class="card"><div class="empty">
+    尚無師資資料。<br>請確認課程場次分頁中有「講師」欄。</div></div>`;
+  return `<div class="card"><div class="ch">師資負擔<small>依場次數排序</small></div>
+    <div class="scroll"><table><thead><tr><th>講師</th><th class="n">場次</th>
+      <th class="n">授課人次</th><th>課程</th></tr></thead><tbody>`+
+    Object.entries(by).sort((a,b)=>b[1].n-a[1].n).map(([t,v])=>
+      `<tr><td>${t}</td><td class="n">${v.n}</td><td class="n">${v.act}</td>
+       <td style="font-size:12.5px;color:var(--mute)">${[...v.courses].join("、")}</td></tr>`).join("")+
+    `</tbody></table></div></div>`;
+}
+
+function fmtDate(d){
+  if(!d) return "";
+  const s=String(d), m=s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[2]+"/"+m[3];
+  const dd=new Date(s);
+  return isNaN(dd)?s.slice(0,10):String(dd.getMonth()+1).padStart(2,"0")+"/"+String(dd.getDate()).padStart(2,"0");
+}
+
+function render(){
+  fillFilters();
+  document.getElementById("p-overview").innerHTML=paneOverview();
+  document.getElementById("p-courses").innerHTML=paneCourses();
+  document.getElementById("p-students").innerHTML=paneStudents();
+  document.getElementById("p-feedback").innerHTML=paneFeedback();
+  document.getElementById("p-faculty").innerHTML=paneFaculty();
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+b.dataset.p));
+  window.scrollTo?.({top:0,behavior:"smooth"});
+}));
+["fYear","fBatch","fCourse"].forEach(id=>
+  document.getElementById(id).addEventListener("change",render));
+reload();
+</script>
+</body>
+</html>
