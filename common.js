@@ -15,7 +15,7 @@
    這個檔案負責：scoring.html（教師評分單）、dash-skills.html（技能評估儀表板）
    assistant.html 有自己的設定區，也要填同一組網址。
    ══════════════════════════════════════════════════════════ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxzwJsXeJAiGw9W5tUc67W6BhsC_gLpLn4jpYqdQUH6i6kOcyP4oPlujnLJSL1BaOaDyw/exec";            // ← 貼上「技能評估」的 /exec 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyROvdsIXVFAoTe_v8X-hq7QNhMtOS2VtrgObZkfxsYBsyY0sKK7jcTDxKzJJvSetcw9Q/exec";            // ← 貼上「技能評估」的 /exec 網址
 
 const ROSTER_TTL = 86400000;   // 名冊本機快取 24 小時
 
@@ -94,7 +94,7 @@ async function loadRoster(force) {
   if (!GAS_URL) { setBar("尚未設定 GAS_URL，人事號需手動輸入姓名。"); return; }
   setBar("名冊載入中…");
   try {
-    const r = await fetch(GAS_URL + "?action=roster", { method: "GET" });
+    const r = await fetch(GAS_URL + "?action=roster" + (force ? "&nocache=1" : ""), { method: "GET" });
     const j = await r.json();
     const list = j.roster || [];
     localStorage.setItem("rosterCache", JSON.stringify({ at: Date.now(), list }));
