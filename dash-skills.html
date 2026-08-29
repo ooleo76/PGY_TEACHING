@@ -363,26 +363,29 @@ function panePerson(){
   else{
     const latest=tx.filter(t=>String(t["評估日期"])===String(tx[tx.length-1]["評估日期"]));
     latest.forEach(t=>{
-      h+=`<div class="dom-h">${t["站別"]||""}　${fmtDate(t["評估日期"])}</div>`;
-      // 優先使用助理端存下的實際文字（可能被編輯過），沒有才用代碼展開
-      const lines=String(t["語句文字"]||"").split("\n").filter(x=>x.trim());
-      if(lines.length){
-        lines.forEach(l=>{
-          const m=l.match(/^\[([^\]]+)\]([◎·])?\s*(.*)$/);
-          const dom=m?m[1]:"", good=m&&m[2]==="◎", txt=m?m[3]:l;
-          h+=`<div style="font-size:13px;padding:3px 0 3px 10px">
-            <span style="color:var(--teald);font-weight:700">${dom}</span>
-            <span style="color:${good?"var(--teald)":"var(--ink)"}">　${good?"◎":"·"} ${txt}</span></div>`;
-        });
-      }else{
-        const codes=String(t["語句代碼"]||"").split(";").filter(Boolean);
-        const byDom={};
-        codes.forEach(c=>{const d=phraseDomain(c);(byDom[d]=byDom[d]||[]).push(c);});
-        Object.entries(byDom).forEach(([d,cs])=>{
-          h+=`<div style="font-size:12.5px;color:var(--teald);font-weight:700;margin-top:7px">${d}</div>`;
-          cs.forEach(c=>h+=`<div style="font-size:13px;padding:3px 0 3px 10px">· ${phraseText(c)}</div>`);
-        });
-      }
+      // 新結構：一列兩站併排；舊結構：一站一列（仍相容）
+      const stations = t["呼吸困難_語句文字"]!==undefined || t["插管_語句文字"]!==undefined
+        ? [["呼吸困難", t["呼吸困難_語句文字"], t["呼吸困難_語句代碼"]],
+           ["插管",     t["插管_語句文字"],     t["插管_語句代碼"]]]
+        : [[t["站別"]||"", t["語句文字"], t["語句代碼"]]];
+      stations.forEach(([stName, txt, codes])=>{
+        if(!String(txt||"").trim() && !String(codes||"").trim()) return;
+        h+=`<div class="dom-h">${stName}　${fmtDate(t["評估日期"])}</div>`;
+        const lines=String(txt||"").split("\n").filter(x=>x.trim());
+        if(lines.length){
+          lines.forEach(l=>{
+            const m=l.match(/^\[([^\]]+)\]([◎·])?\s*(.*)$/);
+            const dom=m?m[1]:"", good=m&&m[2]==="◎", body=m?m[3]:l;
+            h+=`<div style="font-size:13px;padding:3px 0 3px 10px">
+              <span style="color:var(--teald);font-weight:700">${dom}</span>
+              <span style="color:${good?"var(--teald)":"var(--ink)"}">　${good?"◎":"·"} ${body}</span></div>`;
+          });
+        }else{
+          String(codes||"").split(";").filter(Boolean).forEach(c=>
+            h+=`<div style="font-size:13px;padding:3px 0 3px 10px">
+              <span style="color:var(--teald);font-weight:700">${phraseDomain(c)}</span>　· ${phraseText(c)}</div>`);
+        }
+      });
       if(t["學習建議"]) h+=`<div style="font-size:12.5px;padding:6px 0 0 10px;color:var(--mute)">
         學習建議：${t["學習建議"]}</div>`;
       if(t["額外建議"]) h+=`<div style="font-size:13px;padding:5px 0 0 10px;color:var(--mute)">
@@ -400,8 +403,10 @@ function panePhrases(){
   if(!tx.length) return `<div class="card"><div class="empty">尚無回饋語句資料。</div></div>`;
   const n=new Set(tx.map(t=>String(t["人事號"])+"|"+String(t["評估日期"]))).size||1;
   const cnt={};
-  tx.forEach(t=>String(t["語句代碼"]||"").split(";").filter(Boolean)
-    .forEach(c=>cnt[c]=(cnt[c]||0)+1));
+  tx.forEach(t=>{
+    [t["呼吸困難_語句代碼"], t["插管_語句代碼"], t["語句代碼"]].forEach(v=>
+      String(v||"").split(";").filter(Boolean).forEach(c=>cnt[c]=(cnt[c]||0)+1));
+  });
 
   let h=`<div class="card"><div class="ch">問題熱點
     <small>${n} 份評估　·   百分比＝該句被選中的比率</small></div><div class="cb">`;
