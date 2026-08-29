@@ -15,7 +15,7 @@
    這個檔案負責：scoring.html（教師評分單）、dash-skills.html（技能評估儀表板）
    assistant.html 有自己的設定區，也要填同一組網址。
    ══════════════════════════════════════════════════════════ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbx2Aqe-qHA2NAofe3m-Yq0E0AtWN33M9KYXiz0jDVKEI7v_ShjF9Yzwv67lHVUTtYe0aQ/exec";            // ← 貼上「技能評估」的 /exec 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwzWi-heSvuMb-qU94L9T2eyBLMKSSZ3CCATbzXujjV92pHpFAz4rQfud0TN-uk_lWXcg/exec";            // ← 貼上「技能評估」的 /exec 網址
 
 const ROSTER_TTL = 86400000;   // 名冊本機快取 24 小時
 
