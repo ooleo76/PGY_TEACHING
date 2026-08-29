@@ -428,7 +428,7 @@
 //           → 部署 → 管理部署作業 → 複製網頁應用程式網址
 // ============================================================
 const APP_CONFIG = {
-    gasUrl:     "https://script.google.com/macros/s/AKfycbyROvdsIXVFAoTe_v8X-hq7QNhMtOS2VtrgObZkfxsYBsyY0sKK7jcTDxKzJJvSetcw9Q/exec",   // ← 貼上「技能評估」的 /exec 網址
+    gasUrl:     "https://script.google.com/macros/s/AKfycbzchVWD3V4tnvEX3yLeiBexwbaQM4KNQnx89X5WglWhMBytOLTje8VkqOUtguNZ_w90dA/exec",   // ← 貼上「技能評估」的 /exec 網址
     adminEmail: "ooleo76@gmail.com, chihenglee1006@gmail.com",
     enableNotify: true,       // false = 完全停用後端寫入與通知
     rosterTTL:  86400000      // 名冊本機快取 24 小時
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ============================================================
    整合層：學年度 / 名冊帶入 / 語句代碼 / 離線暫存
    ============================================================ */
-let ROSTER = {}, yearManual = false;
+let ROSTER = {}, FACULTY = [], yearManual = false;
 
 const $ = id => document.getElementById(id);
 const gv = id => ($(id) ? String($(id).value || '').trim() : '');
@@ -602,6 +602,11 @@ function applyRoster(list, note){
     ROSTER = {};
     (list || []).forEach(r => { const k = String(r.eid || '').trim().toUpperCase(); if (k) ROSTER[k] = r; });
     const n = Object.keys(ROSTER).length;
+    if (Array.isArray(FACULTY) && FACULTY.length) {
+        $('raterList').innerHTML = FACULTY
+            .map(f => `<option value="${f.name}">${[f.title, f.dept].filter(Boolean).join(' · ')}</option>`)
+            .join('');
+    }
     $('eidList').innerHTML = Object.keys(ROSTER)
         .map(k => `<option value="${k}">${ROSTER[k].name || ''}</option>`).join('');
     setRosterBar(`名冊 <b>${n}</b> 人${note ? '　' + note : ''}
@@ -613,6 +618,7 @@ async function loadRoster(force){
         try {
             const c = JSON.parse(localStorage.getItem('rosterCache') || 'null');
             if (c && Date.now() - c.at < APP_CONFIG.rosterTTL && c.list && c.list.length) {
+                FACULTY = c.faculty || [];
                 applyRoster(c.list, '（本機快取）'); return;
             }
         } catch (e) {}
@@ -623,12 +629,16 @@ async function loadRoster(force){
         const r = await fetch(APP_CONFIG.gasUrl + '?action=roster' + (force ? '&nocache=1' : ''));
         const j = await r.json();
         const list = j.roster || [];
-        localStorage.setItem('rosterCache', JSON.stringify({ at: Date.now(), list }));
+        FACULTY = j.faculty || [];
+        localStorage.setItem('rosterCache', JSON.stringify({ at: Date.now(), list, faculty: FACULTY }));
         applyRoster(list, '');
     } catch (e) {
         try {
             const c = JSON.parse(localStorage.getItem('rosterCache') || 'null');
-            if (c && c.list && c.list.length) { applyRoster(c.list, '（離線，使用舊快取）'); return; }
+            if (c && c.list && c.list.length) {
+                FACULTY = c.faculty || [];
+                applyRoster(c.list, '（離線，使用舊快取）'); return;
+            }
         } catch (e2) {}
         setRosterBar('名冊載入失敗，人事號需手動輸入姓名。 ' +
             '<button type="button" onclick="loadRoster(true)">重試</button>');
@@ -703,80 +713,77 @@ async function resendPending(){
     setSync(ok ? `已重送 ${ok} 筆` : '重送失敗，請確認網路', ok ? 'ok' : 'err');
 }
 
-/* ---- 蒐集：每個站別一列，語句同時存代碼與文字 ---- */
-function collectRows(reportText){
-    const byStation = {
-        '呼吸困難': { codes: [], lines: [], edits: [] },
-        '插管':     { codes: [], lines: [], edits: [] }
+/* ---- 蒐集：一次施測一列，兩站併排 ---- */
+function collectRow(reportText){
+    const st = {
+        '呼吸困難': { codes: [], lines: [] },
+        '插管':     { codes: [], lines: [] }
     };
+    const edits = [];
 
     document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb => {
         if (cb.getAttribute('data-advice')) return;
         const cat = cb.getAttribute('data-category');
-        const st  = DOM_STATION[cat]; if (!st) return;
-        const ta  = cb.parentElement.querySelector('.editable-text');
+        const s = DOM_STATION[cat]; if (!s) return;
+        const ta = cb.parentElement.querySelector('.editable-text');
         const text = ta ? ta.value.trim() : '';
         if (!text) return;
-        const code = cb.id;
-        byStation[st].codes.push(code);
-        byStation[st].lines.push(`[${cat}]${cb.getAttribute('data-type') === 'good' ? '◎' : '·'} ${text}`);
-        const orig = originalContent[code];
-        if (orig && orig !== text) byStation[st].edits.push({ code, text });
+        st[s].codes.push(cb.id);
+        st[s].lines.push(`[${cat}]${cb.getAttribute('data-type') === 'good' ? '◎' : '·'} ${text}`);
+        const orig = originalContent[cb.id];
+        if (orig && orig !== text) edits.push({ code: cb.id, text: text });
     });
 
     document.querySelectorAll('.custom-item input[type="checkbox"]:checked').forEach(cb => {
         const cat = cb.getAttribute('data-category');
-        const st  = DOM_STATION[cat]; if (!st) return;
+        const s = DOM_STATION[cat]; if (!s) return;
         const txt = cb.parentElement.querySelector('input[type="text"]');
         const text = txt ? txt.value.trim() : '';
         if (!text) return;
-        byStation[st].codes.push(cb.id);
-        byStation[st].lines.push(`[${cat}]${cb.getAttribute('data-type') === 'good' ? '◎' : '·'} ${text}`);
-        byStation[st].edits.push({ code: cb.id, text });
+        st[s].codes.push(cb.id);
+        st[s].lines.push(`[${cat}]${cb.getAttribute('data-type') === 'good' ? '◎' : '·'} ${text}`);
+        edits.push({ code: cb.id, text: text });
     });
 
     const adv = [...document.querySelectorAll('.advice-group input[type="checkbox"]:checked')]
         .map(c => c.parentElement.querySelector('label').textContent.trim()).join('；');
     const respEpa  = document.querySelector('input[name="resp_epa"]:checked');
     const intubEpa = document.querySelector('input[name="intub_epa"]:checked');
-    const extra = gv('additional-comments');
-    const ts = new Date().toISOString();
 
-    const base = {
-        kind: 'text', ts,
-        year: gv('acad-year'), course: '呼吸道擬真',
+    return {
+        kind: 'text', ts: new Date().toISOString(),
+        year: gv('acad-year'), course: COURSE_NAME,
         eid: gv('emp-id').toUpperCase(), name: gv('student-name'),
         round: gv('round'), date: gv('eval-date'),
-        assistant: gv('evaluator'), adminEmail: APP_CONFIG.adminEmail
+        codesResp:  st['呼吸困難'].codes.join(';'),
+        textResp:   st['呼吸困難'].lines.join('\n'),
+        codesIntub: st['插管'].codes.join(';'),
+        textIntub:  st['插管'].lines.join('\n'),
+        edits: JSON.stringify(edits),
+        advice: adv,
+        epaResp:  respEpa  ? respEpa.value  : '',
+        epaIntub: intubEpa ? intubEpa.value : '',
+        extra: gv('additional-comments'),
+        assistant: gv('evaluator'),
+        adminEmail: APP_CONFIG.adminEmail,
+        fullReport: reportText || ''
     };
-
-    return ['呼吸困難', '插管'].map((st, i) => ({
-        ...base,
-        station: st,
-        codes:    byStation[st].codes.join(';'),
-        freetext: byStation[st].lines.join('\n'),
-        edits:    JSON.stringify(byStation[st].edits),
-        advice:   i === 0 ? adv : '',
-        epa:      i === 0 ? (respEpa ? respEpa.value : '') : (intubEpa ? intubEpa.value : ''),
-        extra:    i === 0 ? extra : '',
-        fullReport: i === 0 ? (reportText || '') : ''
-    })).filter(r => r.codes || r.extra || r.epa);
 }
 
 async function sendRows(reportText){
-    const rows = collectRows(reportText);
-    if (!rows.length) { setSync('沒有可送出的內容', 'err'); return; }
-    const pend = readPending().concat(rows);
-    writePending(pend); showPending();
-    setSync('送出中…');
-    let ok = 0;
-    for (const r of rows) {
-        try { await postRow(r); ok++; writePending(readPending().filter(x => !(x.ts === r.ts && x.station === r.station))); }
-        catch (e) {}
+    const row = collectRow(reportText);
+    if (!row.codesResp && !row.codesIntub && !row.extra && !row.epaResp && !row.epaIntub) {
+        setSync('沒有可送出的內容', 'err'); return;
     }
-    showPending();
-    setSync(ok === rows.length ? '已送出至試算表' : '部分送出失敗，已存本機可重送',
-            ok === rows.length ? 'ok' : 'err');
+    writePending(readPending().concat([row])); showPending();
+    setSync('送出中…');
+    try {
+        await postRow(row);
+        writePending(readPending().filter(x => x.ts !== row.ts));
+        showPending(); setSync('已送出至試算表', 'ok');
+    } catch (e) {
+        showPending(); setSync('送出失敗，已存本機可重送', 'err');
+    }
 }
 
 function missingFields(){
