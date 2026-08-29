@@ -15,7 +15,7 @@
    這個檔案負責：scoring.html（教師評分單）、dash-skills.html（技能評估儀表板）
    assistant.html 有自己的設定區，也要填同一組網址。
    ══════════════════════════════════════════════════════════ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyROvdsIXVFAoTe_v8X-hq7QNhMtOS2VtrgObZkfxsYBsyY0sKK7jcTDxKzJJvSetcw9Q/exec";            // ← 貼上「技能評估」的 /exec 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzchVWD3V4tnvEX3yLeiBexwbaQM4KNQnx89X5WglWhMBytOLTje8VkqOUtguNZ_w90dA/exec";            // ← 貼上「技能評估」的 /exec 網址
 
 const ROSTER_TTL = 86400000;   // 名冊本機快取 24 小時
 
@@ -59,7 +59,7 @@ function syncYear() {
 }
 
 /* ---------- 名冊 ---------- */
-let ROSTER = {};
+let ROSTER = {}, FACULTY = [];
 
 function setBar(html) {
   const b = document.getElementById("rosterBar");
@@ -73,6 +73,12 @@ function applyRoster(list, note) {
     if (k) ROSTER[k] = r;
   });
   const n = Object.keys(ROSTER).length;
+  const rl = document.getElementById("raterList");
+  if (rl && FACULTY.length) {
+    rl.innerHTML = FACULTY
+      .map(f => `<option value="${f.name}">${[f.title, f.dept].filter(Boolean).join(" · ")}</option>`)
+      .join("");
+  }
   const dl = document.getElementById("eidList");
   if (dl) dl.innerHTML = Object.keys(ROSTER)
     .map(k => `<option value="${k}">${ROSTER[k].name || ""}</option>`).join("");
@@ -86,6 +92,7 @@ async function loadRoster(force) {
     try {
       const c = JSON.parse(localStorage.getItem("rosterCache") || "null");
       if (c && Date.now() - c.at < ROSTER_TTL && c.list && c.list.length) {
+        FACULTY = c.faculty || [];
         applyRoster(c.list, "（本機快取）");
         return;
       }
@@ -97,12 +104,17 @@ async function loadRoster(force) {
     const r = await fetch(GAS_URL + "?action=roster" + (force ? "&nocache=1" : ""), { method: "GET" });
     const j = await r.json();
     const list = j.roster || [];
-    localStorage.setItem("rosterCache", JSON.stringify({ at: Date.now(), list }));
+    FACULTY = j.faculty || [];
+    localStorage.setItem("rosterCache", JSON.stringify({ at: Date.now(), list, faculty: FACULTY }));
     applyRoster(list, "");
   } catch (e) {
     try {
       const c = JSON.parse(localStorage.getItem("rosterCache") || "null");
-      if (c && c.list && c.list.length) { applyRoster(c.list, "（離線，使用舊快取）"); return; }
+      if (c && c.list && c.list.length) {
+        FACULTY = c.faculty || [];
+        applyRoster(c.list, "（離線，使用舊快取）");
+        return;
+      }
     } catch (e2) {}
     setBar(`名冊載入失敗，人事號需手動輸入姓名。
       <button type="button" class="g" onclick="loadRoster(true)">重試</button>`);
