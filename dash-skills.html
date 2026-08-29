@@ -62,8 +62,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
 .bar{display:grid;grid-template-columns:150px 1fr 66px;gap:11px;align-items:center;
   margin-bottom:8px;font-size:13px}
 .bar .n{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tr{position:relative;height:17px;background:var(--card);border-radius:2px;overflow:hidden}
-.fl{height:100%;background:var(--teal);transition:width .3s ease}
+.tr{position:relative;display:block;height:17px;background:var(--card);
+  border-radius:2px;overflow:hidden}
+.fl{display:block;height:100%;width:0;background:var(--teal);transition:width .3s ease}
 .fl.b{background:var(--teall)}
 .bar .v{font-family:var(--num);font-size:12.5px;font-weight:700;text-align:right;color:var(--mute)}
 .dual{display:flex;gap:3px;flex-direction:column}
@@ -433,26 +434,78 @@ function panePhrases(){
 /* ---------- EPA 對照 ---------- */
 function paneEpa(R){
   if(!R.length) return `<div class="card"><div class="empty">此條件下沒有資料。</div></div>`;
-  let h=`<div class="card"><div class="ch">EPA 等級分布<small>教師評定</small></div><div class="cb">`;
-  [["EPA_呼吸困難","呼吸困難評估"],["EPA_插管","氣管內管插管"]].forEach(([c,nm])=>{
-    const v=R.map(r=>num(r[c])).filter(x=>x!==null);
-    h+=`<div class="dom-h">${nm}　<span style="font-weight:400;color:var(--mute)">n=${v.length}${
-      v.length?"　平均 "+avg(v).toFixed(2):""}</span></div>`;
-    [1,2,3,4,5].forEach(lv=>{
-      const c2=v.filter(x=>x===lv).length, pc=v.length?Math.round(c2/v.length*100):0;
-      h+=`<div class="bar"><span class="n">等級 ${lv}</span>
-        <span class="tr"><span class="fl" style="width:${pc}%"></span></span>
-        <span class="v">${c2} 人 ${pc}%</span></div>`;
-    });
+
+  // 一個人一次施測算一筆；同一人的第一次與第二次要分開統計，
+  // 同一人同一次序若有重複列（例如手動貼過），只取最新一筆。
+  const byRound={};
+  R.forEach(r=>{
+    const rd=String(r["施測次序"]||"未註明").trim();
+    const eid=String(r["人事號"]||r["姓名"]||"").trim().toUpperCase();
+    if(!eid) return;
+    (byRound[rd]=byRound[rd]||{})[eid]=r;      // 後者覆蓋前者
   });
-  h+=`</div></div>`;
+  const roundNames=Object.keys(byRound)
+    .sort((a,b)=>["第一次","第二次","第三次"].indexOf(a)-["第一次","第二次","第三次"].indexOf(b));
+  const dupTotal=R.length-roundNames.reduce((a,rd)=>a+Object.keys(byRound[rd]).length,0);
+
+  const COLOR={"第一次":"#9AD4CA","第二次":"var(--teal)","第三次":"var(--teald)"};
+
+  let h=`<div class="card"><div class="ch">EPA 等級分布
+    <small>教師評定　·　一人一次施測算一筆${dupTotal>0?`　·　已略過 ${dupTotal} 筆重複`:""}</small></div><div class="cb">`;
+
+  [["EPA_呼吸困難","呼吸困難評估"],["EPA_插管","氣管內管插管"]].forEach(([col,nm])=>{
+    // 各次序的人數與平均
+    const stat=roundNames.map(rd=>{
+      const rows=Object.values(byRound[rd]);
+      const v=rows.map(r=>num(r[col])).filter(x=>x!==null);
+      return {rd, v, n:v.length, mean:avg(v)};
+    }).filter(x=>x.n>0);
+    if(!stat.length) return;
+
+    h+=`<div class="dom-h">${nm}　<span style="font-weight:400;color:var(--mute)">`
+      + stat.map(s=>`${s.rd} n=${s.n} 平均 ${s.mean.toFixed(2)}`).join("　·　")
+      + `</span></div>`;
+
+    [1,2,3,4,5].forEach(lv=>{
+      h+=`<div class="bar"><span class="n">等級 ${lv}</span><span class="dual">`;
+      stat.forEach(s=>{
+        const c=s.v.filter(x=>x===lv).length;
+        const pc=s.n?Math.round(c/s.n*100):0;
+        h+=`<span class="tr" title="${s.rd}：${c} 人（${pc}%）">
+              <span class="fl" style="width:${pc}%;background:${COLOR[s.rd]||"var(--teal)"}"></span></span>`;
+      });
+      h+=`</span><span class="v">`
+        + stat.map(s=>s.v.filter(x=>x===lv).length).join(" / ")
+        + `</span></div>`;
+    });
+
+    // 有兩次以上 → 顯示平均變化
+    if(stat.length>1){
+      const d=stat[stat.length-1].mean-stat[0].mean;
+      h+=`<div style="font-size:12.5px;color:var(--mute);margin:6px 0 2px">
+        ${stat[0].rd} → ${stat[stat.length-1].rd} 平均
+        <b style="color:${d>=0?"var(--teald)":"var(--brick)"}">
+        ${stat[0].mean.toFixed(2)} → ${stat[stat.length-1].mean.toFixed(2)}
+        ${d>=0?"▲":"▼"}${Math.abs(d).toFixed(2)}</b></div>`;
+    }
+  });
+
+  h+=`</div><div class="legend">`
+    + roundNames.map(rd=>`<span><i style="display:inline-block;width:11px;height:11px;
+        border-radius:2px;background:${COLOR[rd]||"var(--teal)"};margin-right:5px"></i>${rd}</span>`).join("")
+    + `<span style="color:var(--mute)">每列由上到下依序為各次施測</span></div></div>`;
 
   // 分數 vs EPA 一致性
   h+=`<div class="card"><div class="ch">分數與 EPA 的一致性
     <small>落差 ≥2 級者須於備註說明</small></div><div class="cb">`;
   const band=pc=>pc<60?[1,2]:pc<70?[2,2]:pc<80?[3,3]:pc<90?[3,4]:[4,5];
   const off=[];
+  const seen={};
   R.forEach(r=>{
+    const k=[String(r["人事號"]||"").toUpperCase(),String(r["課程"]||""),
+             String(r["施測次序"]||"")].join("|");
+    if(seen[k]) return;
+    seen[k]=1;
     [["站一分數","EPA_呼吸困難","呼吸困難"],["站二分數","EPA_插管","插管"]].forEach(([sc,ec,nm])=>{
       const s=num(r[sc]), e=num(r[ec]);
       if(s===null||e===null) return;
