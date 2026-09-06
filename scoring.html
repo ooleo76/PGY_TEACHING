@@ -215,8 +215,10 @@ footer{margin-top:32px;padding-top:15px;border-top:1px solid var(--line);
        <input id="stu" type="text" autocomplete="off" placeholder="自動帶入"></div>
   <div class="f"><label>職級</label><select id="lvl"><option>PGY1</option><option>PGY2</option></select></div>
   <div class="f"><label>施測次序</label><select id="rnd"><option>第一次</option><option>第二次</option><option>第三次</option></select></div>
-  <div class="f"><label>評分者</label><input id="rater" type="text" autocomplete="off"
-       list="raterList"><datalist id="raterList"></datalist></div>
+  <div class="f"><label>評分者</label>
+       <select id="raterSel"><option value="">載入中…</option></select>
+       <input id="rater" type="text" autocomplete="off" placeholder="請輸入姓名"
+              style="display:none;margin-top:6px"></div>
   <div class="f"><label>日期</label><input id="dt" type="date"></div>
 </div></div>
 
@@ -251,14 +253,11 @@ footer{margin-top:32px;padding-top:15px;border-top:1px solid var(--line);
         <option value="3">3　合格</option>
         <option value="4">4　良好</option>
         <option value="5">5　優秀</option></select></div>
-      <div class="f"><label>EPA　呼吸困難評估</label><select id="e1" class="epa">
-        <option value="">— 選擇 —</option><option>1</option><option>2</option><option>3</option>
-        <option>4</option><option>5</option></select></div>
-      <div class="f"><label>EPA　氣管內管插管</label><select id="e2" class="epa">
-        <option value="">— 選擇 —</option><option>1</option><option>2</option><option>3</option>
-        <option>4</option><option>5</option></select></div>
-      <p class="epahint">EPA 以本表為準。助理端回饋表亦有 EPA 欄位，合併時以教師評定覆蓋。
-        1 僅可在旁觀看／2 需 VS 在旁監督／3 VS 需立即可到／4 事後報備即可／5 可督導他人。</p>
+      <div class="f wide"><label>EPA　呼吸困難評估</label>
+        <select id="e1" class="epa"></select></div>
+      <div class="f wide"><label>EPA　氣管內管插管</label>
+        <select id="e2" class="epa"></select></div>
+      <p class="epahint">EPA 以本表為準。助理端回饋表亦有 EPA 欄位，合併時以教師評定覆蓋。</p>
     </div>
   </div>
 
@@ -321,6 +320,17 @@ const D=[
  5:"波形確認、五點聽診、生命徵象、CXR、ABG、回到病因處置皆完整"}}
 ];
 
+/* ---- EPA 六級（依本院呼吸道擬真課程定義）---- */
+const EPA_LEVELS=[
+  {v:"1",  t:"仍無法實際在臨床操作"},
+  {v:"2a", t:"教師在旁逐步共同操作"},
+  {v:"2b", t:"教師在旁必要時協助"},
+  {v:"3a", t:"教師事後重點確認"},
+  {v:"3b", t:"必要時知會教師確認"},
+  {v:"4",  t:"獨立執行"}
+];
+const epaRank=v=>{const i=EPA_LEVELS.findIndex(x=>x.v===String(v));return i<0?null:i+1;};
+
 const SAFE=[
  ["s1","升階氧氣優先於完成問診（低血氧先處理）",["y","n"]],
  ["s2","Preoxygenation 給滿 3 分鐘且方式正確",["y","n"]],
@@ -358,11 +368,28 @@ function build(){
   });
   document.getElementById("body").innerHTML=h;
 
+  const epaOpts='<option value="">— 選擇 —</option>'+
+    EPA_LEVELS.map(x=>`<option value="${x.v}">${x.v}　${x.t}</option>`).join("");
+  $("e1").innerHTML=epaOpts; $("e2").innerHTML=epaOpts;
+
+  // 評分者：下拉為主，選「手動輸入」才顯示文字框
+  $("raterSel").addEventListener("change",()=>{
+    const manual=$("raterSel").value==="__manual__";
+    $("rater").style.display=manual?"block":"none";
+    if(!manual){ $("rater").value=$("raterSel").value; }
+    else{ $("rater").value=""; $("rater").focus(); }
+    if($("rater").value.trim()) localStorage.setItem("last_rater",$("rater").value.trim());
+  });
+  $("rater").addEventListener("change",e=>{
+    if(e.target.value.trim()) localStorage.setItem("last_rater",e.target.value.trim());
+  });
+
   document.addEventListener("change",e=>{if(e.target.matches("input,select"))calc();});
   calc();
   initCommon({page:"score"});
 }
 
+const $=id=>document.getElementById(id);
 const val=n=>{const x=document.querySelector(`input[name="${n}"]:checked`);return x?x.value:null;};
 
 function calc(){
