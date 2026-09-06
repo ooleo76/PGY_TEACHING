@@ -156,6 +156,26 @@ tbody tr.sel{background:#F1F7F5}
 <script src="phrases.js"></script>
 <script src="common.js"></script>
 <script>
+/* EPA 六級序位量表（與 scoring.html 一致） */
+const EPA_LEVELS=[
+  {v:"1",  t:"仍無法實際在臨床操作"},
+  {v:"2a", t:"教師在旁逐步共同操作"},
+  {v:"2b", t:"教師在旁必要時協助"},
+  {v:"3a", t:"教師事後重點確認"},
+  {v:"3b", t:"必要時知會教師確認"},
+  {v:"4",  t:"獨立執行"}
+];
+/* 序位 1–6，用來算平均與落差；舊資料的 1–5 數字也一併對應 */
+const LEGACY={"1":1,"2":2,"3":4,"4":6,"5":6};
+function epaRank(v){
+  const t=String(v==null?"":v).trim();
+  if(!t) return null;
+  const i=EPA_LEVELS.findIndex(x=>x.v===t);
+  if(i>=0) return i+1;
+  return LEGACY[t]||null;
+}
+const epaLabel=r=>(r>=1&&r<=6)?EPA_LEVELS[r-1].v:"—";
+
 const DOM_KEYS=[["hx","病史收集",1],["pe","理學檢查",1],["tx","處置與治療",1],
   ["lab","檢驗檢查",1],["ho","交班報告",1],["prep","插管前準備",2],["med","藥物給予",2],
   ["tech","插管技術",2],["post","插管後評估",2]];
@@ -279,7 +299,7 @@ function paneStudents(R){
       st1:num(last["站一分數"]),st2:num(last["站二分數"]),
       d1:rs.length>1?d(first["站一分數"],last["站一分數"]):null,
       d2:rs.length>1?d(first["站二分數"],last["站二分數"]):null,
-      epa1:num(last["EPA_呼吸困難"]),epa2:num(last["EPA_插管"]),
+      epa1:last["EPA_呼吸困難"]||"",epa2:last["EPA_插管"]||"",
       safe:rs.some(r=>SAFE_COLS.some(([c])=>String(r[c])==="n")),
       date:last["評估日期"]};
   }).sort((a,b)=>(a.st1??999)-(b.st1??999));
@@ -402,22 +422,36 @@ function panePhrases(){
   const y=g("fYear");
   const tx=RAW.texts.filter(t=>!y||String(t["學年度"])===y);
   if(!tx.length) return `<div class="card"><div class="empty">尚無回饋語句資料。</div></div>`;
-  const n=new Set(tx.map(t=>String(t["人事號"])+"|"+String(t["評估日期"]))).size||1;
-  const cnt={};
+  // 一位學員、一門課、一次施測 = 一份。同一份重複列只取最新，
+  // 且同一份裡重複出現的代碼只算一次，避免比率超過 100%。
+  const forms={};
   tx.forEach(t=>{
-    [t["呼吸困難_語句代碼"], t["插管_語句代碼"], t["語句代碼"]].forEach(v=>
-      String(v||"").split(";").filter(Boolean).forEach(c=>cnt[c]=(cnt[c]||0)+1));
+    const key=[String(t["人事號"]||"").trim().toUpperCase(),
+               String(t["課程"]||"").trim(),
+               String(t["施測次序"]||"").trim()].join("|");
+    if(key==="||") return;
+    forms[key]=t;                                   // 後者覆蓋前者
   });
+  const list=Object.values(forms);
+  const n=list.length||1;
+  const cnt={};
+  list.forEach(t=>{
+    const inThis=new Set();
+    [t["呼吸困難_語句代碼"], t["插管_語句代碼"], t["語句代碼"]].forEach(v=>
+      String(v||"").split(";").map(x=>x.trim()).filter(Boolean).forEach(c=>inThis.add(c)));
+    inThis.forEach(c=>cnt[c]=(cnt[c]||0)+1);
+  });
+  const dup=tx.length-list.length;
 
   let h=`<div class="card"><div class="ch">問題熱點
-    <small>${n} 份評估　·   百分比＝該句被選中的比率</small></div><div class="cb">`;
+    <small>${n} 份評估${dup>0?`（已略過 ${dup} 筆重複）`:""}　·　百分比＝該句被選中的比率</small></div><div class="cb">`;
   DOM_KEYS.forEach(([k,nm])=>{
     const items=(P[k]?.items||[]).map(it=>({...it,c2:cnt[it.c]||0}))
       .filter(it=>it.c2>0).sort((a,b)=>b.c2-a.c2);
     if(!items.length) return;
     h+=`<div class="dom-h">${nm}</div>`;
     items.forEach(it=>{
-      const pc=Math.round(it.c2/n*100);
+      const pc=Math.min(100,Math.round(it.c2/n*100));
       h+=`<div class="phrase"><span class="t">${it.p==="pos"?"◎ ":""}${it.t}</span>
         <span class="tr"><span class="fl" style="width:${pc}%;background:${
           it.p==="pos"?"var(--teall)":pc>=50?"var(--brick)":"var(--ochre)"}"></span></span>
@@ -454,39 +488,38 @@ function paneEpa(R){
     <small>教師評定　·　一人一次施測算一筆${dupTotal>0?`　·　已略過 ${dupTotal} 筆重複`:""}</small></div><div class="cb">`;
 
   [["EPA_呼吸困難","呼吸困難評估"],["EPA_插管","氣管內管插管"]].forEach(([col,nm])=>{
-    // 各次序的人數與平均
     const stat=roundNames.map(rd=>{
       const rows=Object.values(byRound[rd]);
-      const v=rows.map(r=>num(r[col])).filter(x=>x!==null);
+      const v=rows.map(r=>epaRank(r[col])).filter(x=>x!==null);
       return {rd, v, n:v.length, mean:avg(v)};
     }).filter(x=>x.n>0);
     if(!stat.length) return;
 
     h+=`<div class="dom-h">${nm}　<span style="font-weight:400;color:var(--mute)">`
-      + stat.map(s=>`${s.rd} n=${s.n} 平均 ${s.mean.toFixed(2)}`).join("　·　")
+      + stat.map(s=>`${s.rd} n=${s.n} 平均 ${epaLabel(Math.round(s.mean))}`).join("　·　")
       + `</span></div>`;
 
-    [1,2,3,4,5].forEach(lv=>{
-      h+=`<div class="bar"><span class="n">等級 ${lv}</span><span class="dual">`;
+    EPA_LEVELS.forEach((lv,i)=>{
+      const rank=i+1;
+      h+=`<div class="bar"><span class="n" title="${lv.t}">${lv.v}　${lv.t}</span><span class="dual">`;
       stat.forEach(s=>{
-        const c=s.v.filter(x=>x===lv).length;
+        const c=s.v.filter(x=>x===rank).length;
         const pc=s.n?Math.round(c/s.n*100):0;
         h+=`<span class="tr" title="${s.rd}：${c} 人（${pc}%）">
               <span class="fl" style="width:${pc}%;background:${COLOR[s.rd]||"var(--teal)"}"></span></span>`;
       });
       h+=`</span><span class="v">`
-        + stat.map(s=>s.v.filter(x=>x===lv).length).join(" / ")
+        + stat.map(s=>s.v.filter(x=>x===rank).length).join(" / ")
         + `</span></div>`;
     });
 
-    // 有兩次以上 → 顯示平均變化
     if(stat.length>1){
-      const d=stat[stat.length-1].mean-stat[0].mean;
+      const a=stat[0], b=stat[stat.length-1], d=b.mean-a.mean;
       h+=`<div style="font-size:12.5px;color:var(--mute);margin:6px 0 2px">
-        ${stat[0].rd} → ${stat[stat.length-1].rd} 平均
+        ${a.rd} → ${b.rd} 平均
         <b style="color:${d>=0?"var(--teald)":"var(--brick)"}">
-        ${stat[0].mean.toFixed(2)} → ${stat[stat.length-1].mean.toFixed(2)}
-        ${d>=0?"▲":"▼"}${Math.abs(d).toFixed(2)}</b></div>`;
+        ${epaLabel(Math.round(a.mean))} → ${epaLabel(Math.round(b.mean))}
+        ${d>=0?"▲":"▼"}${Math.abs(d).toFixed(2)} 級</b></div>`;
     }
   });
 
@@ -498,7 +531,8 @@ function paneEpa(R){
   // 分數 vs EPA 一致性
   h+=`<div class="card"><div class="ch">分數與 EPA 的一致性
     <small>落差 ≥2 級者須於備註說明</small></div><div class="cb">`;
-  const band=pc=>pc<60?[1,2]:pc<70?[2,2]:pc<80?[3,3]:pc<90?[3,4]:[4,5];
+  // 分數 → 預期 EPA 序位（1=「1」…6=「4」）
+  const band=pc=>pc<60?[1,2]:pc<70?[2,3]:pc<80?[3,4]:pc<90?[4,5]:[5,6];
   const off=[];
   const seen={};
   R.forEach(r=>{
@@ -507,7 +541,7 @@ function paneEpa(R){
     if(seen[k]) return;
     seen[k]=1;
     [["站一分數","EPA_呼吸困難","呼吸困難"],["站二分數","EPA_插管","插管"]].forEach(([sc,ec,nm])=>{
-      const s=num(r[sc]), e=num(r[ec]);
+      const s=num(r[sc]), e=epaRank(r[ec]);
       if(s===null||e===null) return;
       const b=band(s), gap=e<b[0]?b[0]-e:e>b[1]?e-b[1]:0;
       if(gap>=2) off.push({name:r["姓名"],eid:r["人事號"],date:r["評估日期"],nm,s,e,gap,b});
@@ -517,8 +551,9 @@ function paneEpa(R){
     ? `<table><thead><tr><th>學員</th><th>站別</th><th class="n">分數</th>
         <th class="n">預期 EPA</th><th class="n">實際</th><th class="n">落差</th><th>日期</th></tr></thead><tbody>`+
       off.sort((a,b)=>b.gap-a.gap).map(o=>`<tr><td>${o.name||o.eid}</td><td>${o.nm}</td>
-        <td class="n">${o.s}%</td><td class="n">${o.b[0]}${o.b[1]!==o.b[0]?"–"+o.b[1]:""}</td>
-        <td class="n">${o.e}</td><td class="n"><span class="pill p-lo">${o.gap}</span></td>
+        <td class="n">${o.s}%</td>
+        <td class="n">${epaLabel(o.b[0])}${o.b[1]!==o.b[0]?"–"+epaLabel(o.b[1]):""}</td>
+        <td class="n">${epaLabel(o.e)}</td><td class="n"><span class="pill p-lo">${o.gap}</span></td>
         <td class="num">${fmtDate(o.date)}</td></tr>`).join("")+`</tbody></table>`
     : `<div class="empty" style="padding:14px 0">沒有落差 ≥2 級的紀錄，分數與 EPA 判斷一致。</div>`;
   h+=`</div></div>`;
