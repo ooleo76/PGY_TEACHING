@@ -152,8 +152,9 @@
             </div>
             <div class="input-group">
                 <label for="evaluator">填寫人:</label>
-                <input type="text" id="evaluator" list="raterList" placeholder="請輸入姓名">
-                <datalist id="raterList"></datalist>
+                <select id="asstSel"><option value="">載入中…</option></select>
+                <input type="text" id="evaluator" placeholder="請輸入姓名"
+                       style="display:none;margin-top:6px">
             </div>
             <div class="input-group">
                 <label for="eval-date">評估日期:</label>
@@ -382,19 +383,21 @@
         <h2>三、整體表現評估</h2>
         <h3>EPA評分 (呼吸困難評估)</h3>
         <div class="radio-group">
-            <div class="radio-item" onclick="selectRadio('resp_epa','1')"><input type="radio" name="resp_epa" value="1" id="resp_epa_1"><label for="resp_epa_1">等級一 - 只能在旁邊看</label></div>
-            <div class="radio-item" onclick="selectRadio('resp_epa','2')"><input type="radio" name="resp_epa" value="2" id="resp_epa_2"><label for="resp_epa_2">等級二 - 需要直接監督才能完成</label></div>
-            <div class="radio-item" onclick="selectRadio('resp_epa','3')"><input type="radio" name="resp_epa" value="3" id="resp_epa_3"><label for="resp_epa_3">等級三 - 可以在間接監督下執行</label></div>
-            <div class="radio-item" onclick="selectRadio('resp_epa','4')"><input type="radio" name="resp_epa" value="4" id="resp_epa_4"><label for="resp_epa_4">等級四 - 獨立操作執行，事後確認即可</label></div>
-            <div class="radio-item" onclick="selectRadio('resp_epa','5')"><input type="radio" name="resp_epa" value="5" id="resp_epa_5"><label for="resp_epa_5">等級五 - 對資淺學員進行監督教學</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','1')"><input type="radio" name="resp_epa" value="1" id="resp_epa_1"><label for="resp_epa_1">1　仍無法實際在臨床操作</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','2a')"><input type="radio" name="resp_epa" value="2a" id="resp_epa_2"><label for="resp_epa_2">2a　教師在旁逐步共同操作</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','2b')"><input type="radio" name="resp_epa" value="2b" id="resp_epa_3"><label for="resp_epa_3">2b　教師在旁必要時協助</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','3a')"><input type="radio" name="resp_epa" value="3a" id="resp_epa_4"><label for="resp_epa_4">3a　教師事後重點確認</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','3b')"><input type="radio" name="resp_epa" value="3b" id="resp_epa_5"><label for="resp_epa_5">3b　必要時知會教師確認</label></div>
+            <div class="radio-item" onclick="selectRadio('resp_epa','4')"><input type="radio" name="resp_epa" value="4" id="resp_epa_6"><label for="resp_epa_6">4　獨立執行</label></div>
         </div>
         <h3>EPA評分 (氣管內管插管)</h3>
         <div class="radio-group">
-            <div class="radio-item" onclick="selectRadio('intub_epa','1')"><input type="radio" name="intub_epa" value="1" id="intub_epa_1"><label for="intub_epa_1">等級一 - 只能在旁邊看</label></div>
-            <div class="radio-item" onclick="selectRadio('intub_epa','2')"><input type="radio" name="intub_epa" value="2" id="intub_epa_2"><label for="intub_epa_2">等級二 - 需要直接監督才能完成</label></div>
-            <div class="radio-item" onclick="selectRadio('intub_epa','3')"><input type="radio" name="intub_epa" value="3" id="intub_epa_3"><label for="intub_epa_3">等級三 - 可以在間接監督下執行</label></div>
-            <div class="radio-item" onclick="selectRadio('intub_epa','4')"><input type="radio" name="intub_epa" value="4" id="intub_epa_4"><label for="intub_epa_4">等級四 - 獨立操作執行，事後確認即可</label></div>
-            <div class="radio-item" onclick="selectRadio('intub_epa','5')"><input type="radio" name="intub_epa" value="5" id="intub_epa_5"><label for="intub_epa_5">等級五 - 對資淺學員進行監督教學</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','1')"><input type="radio" name="intub_epa" value="1" id="intub_epa_1"><label for="intub_epa_1">1　仍無法實際在臨床操作</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','2a')"><input type="radio" name="intub_epa" value="2a" id="intub_epa_2"><label for="intub_epa_2">2a　教師在旁逐步共同操作</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','2b')"><input type="radio" name="intub_epa" value="2b" id="intub_epa_3"><label for="intub_epa_3">2b　教師在旁必要時協助</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','3a')"><input type="radio" name="intub_epa" value="3a" id="intub_epa_4"><label for="intub_epa_4">3a　教師事後重點確認</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','3b')"><input type="radio" name="intub_epa" value="3b" id="intub_epa_5"><label for="intub_epa_5">3b　必要時知會教師確認</label></div>
+            <div class="radio-item" onclick="selectRadio('intub_epa','4')"><input type="radio" name="intub_epa" value="4" id="intub_epa_6"><label for="intub_epa_6">4　獨立執行</label></div>
         </div>
         <h3>額外建議</h3>
         <textarea id="additional-comments" placeholder="請輸入其他具體建議或觀察到的優點..."></textarea>
@@ -428,7 +431,7 @@
 //           → 部署 → 管理部署作業 → 複製網頁應用程式網址
 // ============================================================
 const APP_CONFIG = {
-    gasUrl:     "https://script.google.com/macros/s/AKfycbwzWi-heSvuMb-qU94L9T2eyBLMKSSZ3CCATbzXujjV92pHpFAz4rQfud0TN-uk_lWXcg/exec",   // ← 貼上「技能評估」的 /exec 網址
+    gasUrl:     "",   // ← 貼上「技能評估」的 /exec 網址
     adminEmail: "ooleo76@gmail.com, chihenglee1006@gmail.com",
     enableNotify: true,       // false = 完全停用後端寫入與通知
     rosterTTL:  86400000      // 名冊本機快取 24 小時
@@ -436,6 +439,20 @@ const APP_CONFIG = {
 // ============================================================
 // ▲▲▲ 設定區塊結束，以下程式碼無需修改 ▲▲▲
 // ============================================================
+
+/* EPA 六級（與教師端評分單一致） */
+const EPA_LEVELS = [
+  { v: "1",  t: "仍無法實際在臨床操作" },
+  { v: "2a", t: "教師在旁逐步共同操作" },
+  { v: "2b", t: "教師在旁必要時協助" },
+  { v: "3a", t: "教師事後重點確認" },
+  { v: "3b", t: "必要時知會教師確認" },
+  { v: "4",  t: "獨立執行" }
+];
+const epaText = v => {
+  const x = EPA_LEVELS.find(y => y.v === String(v));
+  return x ? x.v + '　' + x.t : '—';
+};
 
 /* 本表僅用於呼吸道擬真，課程固定寫入 */
 const COURSE_NAME = '呼吸道擬真';
@@ -516,6 +533,14 @@ document.addEventListener('DOMContentLoaded', function () {
     $('student-name').addEventListener('input', () => { $('nameSrc').textContent = ''; });
     const lastA = localStorage.getItem('last_assistant');
     if (lastA) $('evaluator').value = lastA;
+    $('asstSel').addEventListener('change', () => {
+        const manual = $('asstSel').value === '__manual__';
+        $('evaluator').style.display = manual ? 'block' : 'none';
+        if (manual) { $('evaluator').value = ''; $('evaluator').focus(); }
+        else { $('evaluator').value = $('asstSel').value; }
+        if ($('evaluator').value.trim())
+            localStorage.setItem('last_assistant', $('evaluator').value.trim());
+    });
     $('evaluator').addEventListener('change', e => {
         if (e.target.value.trim()) localStorage.setItem('last_assistant', e.target.value.trim());
     });
@@ -602,10 +627,16 @@ function applyRoster(list, note){
     ROSTER = {};
     (list || []).forEach(r => { const k = String(r.eid || '').trim().toUpperCase(); if (k) ROSTER[k] = r; });
     const n = Object.keys(ROSTER).length;
-    if (Array.isArray(FACULTY) && FACULTY.length) {
-        $('raterList').innerHTML = FACULTY
-            .map(f => `<option value="${f.name}">${[f.title, f.dept].filter(Boolean).join(' · ')}</option>`)
-            .join('');
+    const sel = $('asstSel'), box = $('evaluator');
+    if (sel) {
+        const last = localStorage.getItem('last_assistant') || '';
+        const names = (FACULTY || []).map(f => f.name);
+        sel.innerHTML = '<option value="">— 選擇 —</option>'
+            + names.map(n => `<option value="${n}"${n === last ? ' selected' : ''}>${n}</option>`).join('')
+            + '<option value="__manual__">＋ 手動輸入…</option>';
+        if (last && names.indexOf(last) >= 0) { box.value = last; box.style.display = 'none'; }
+        else if (last) { sel.value = '__manual__'; box.value = last; box.style.display = 'block'; }
+        if (!names.length) { sel.value = '__manual__'; box.style.display = 'block'; }
     }
     $('eidList').innerHTML = Object.keys(ROSTER)
         .map(k => `<option value="${k}">${ROSTER[k].name || ''}</option>`).join('');
@@ -858,8 +889,11 @@ function generateReport() {
     const respEpa  = document.querySelector('input[name="resp_epa"]:checked');
     const intubEpa = document.querySelector('input[name="intub_epa"]:checked');
     report += `=========\nEPA評分：\n`;
-    report += `呼吸困難評估：${respEpa  ? '等級' + respEpa.value  : '未評分'}\n`;
-    report += `氣管內管插管：${intubEpa ? '等級' + intubEpa.value : '未評分'}\n\n`;
+    report += `呼吸困難評估：${respEpa ? epaText(respEpa.value) : '未評分'}
+`;
+    report += `氣管內管插管：${intubEpa ? epaText(intubEpa.value) : '未評分'}
+
+`;
 
     if (selectedAdvices.size > 0) {
         report += `=========\n學習建議：\n`;
