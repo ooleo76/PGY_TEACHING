@@ -15,7 +15,7 @@
    這個檔案負責：scoring.html（教師評分單）、dash-skills.html（技能評估儀表板）
    assistant.html 有自己的設定區，也要填同一組網址。
    ══════════════════════════════════════════════════════════ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwzWi-heSvuMb-qU94L9T2eyBLMKSSZ3CCATbzXujjV92pHpFAz4rQfud0TN-uk_lWXcg/exec";            // ← 貼上「技能評估」的 /exec 網址
+const GAS_URL = "https://script.google.com/macros/s/AKfycbySHiglzS3VXNa0a1N1JrNb1fdbqwEMSOVfYdokcWHEV7tnesHFwTTp9DNARxXSkodN/exec";            // ← 貼上「技能評估」的 /exec 網址
 
 const ROSTER_TTL = 86400000;   // 名冊本機快取 24 小時
 
@@ -73,6 +73,30 @@ function applyRoster(list, note) {
     if (k) ROSTER[k] = r;
   });
   const n = Object.keys(ROSTER).length;
+  // 評分者：優先填下拉，沒有下拉才填 datalist
+  const sel = document.getElementById("raterSel");
+  if (sel) {
+    const last = localStorage.getItem("last_rater") || "";
+    const names = FACULTY.map(f => f.name);
+    sel.innerHTML =
+      '<option value="">— 選擇 —</option>' +
+      names.map(n => `<option value="${n}"${n === last ? " selected" : ""}>${n}</option>`).join("") +
+      '<option value="__manual__">＋ 手動輸入…</option>';
+    const box = document.getElementById("rater");
+    if (box) {
+      if (last && names.indexOf(last) >= 0) {
+        box.value = last; box.style.display = "none";
+      } else if (last) {
+        sel.value = "__manual__"; box.value = last; box.style.display = "block";
+      } else {
+        box.value = "";
+      }
+    }
+    if (!names.length) {
+      sel.value = "__manual__";
+      if (box) box.style.display = "block";
+    }
+  }
   const rl = document.getElementById("raterList");
   if (rl && FACULTY.length) {
     rl.innerHTML = FACULTY
@@ -210,10 +234,11 @@ function initCommon(opt) {
     const s = document.getElementById("nameSrc"); if (s) s.textContent = "";
   });
 
-  // 記住上次填表者
+  // 記住上次填表者（有下拉時由頁面自己處理，這裡只管純文字欄）
   const who = opt.page === "assistant" ? "asst" : "rater";
   const el = document.getElementById(who);
-  if (el) {
+  const hasSelect = !!document.getElementById(who === "rater" ? "raterSel" : "asstSel");
+  if (el && !hasSelect) {
     const last = localStorage.getItem("last_" + who);
     if (last && !el.value) el.value = last;
     el.addEventListener("change", e => {
